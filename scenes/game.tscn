@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://c4qk7xn8ym2pd"]
+
+[ext_resource type="Script" path="res://scenes/game_controller.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/block.gd" id="2_block"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 1080.0
+offset_bottom = 1920.0
+color = Color(0.08, 0.1, 0.12, 1)
+
+[node name="BlocksContainer" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="HBoxContainer" parent="UI"]
+offset_left = 20.0
+offset_top = 40.0
+offset_right = 1060.0
+offset_bottom = 100.0
+
+[node name="ScoreLabel" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 36
+text = "SCORE: 0"
+
+[node name="HighScoreLabel" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 36
+text = "BEST: 0"
+horizontal_alignment = 2
+
+[node name="PerfectLabel" type="Label" parent="UI"]
+visible = false
+offset_left = 340.0
+offset_top = 800.0
+offset_right = 740.0
+offset_bottom = 900.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "PERFECT!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TapHint" type="Label" parent="UI"]
+offset_left = 240.0
+offset_top = 1600.0
+offset_right = 840.0
+offset_bottom = 1680.0
+theme_override_font_sizes/font_size = 28
+text = "TAP TO DROP BLOCK"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BannerPlaceholder" type="ColorRect" parent="UI"]
+offset_left = 0.0
+offset_top = 1820.0
+offset_right = 1080.0
+offset_bottom = 1920.0
+color = Color(0.2, 0.2, 0.2, 0.5)
+
+[node name="BannerText" type="Label" parent="UI/BannerPlaceholder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Banner Ad Area"
+horizontal_alignment = 1
+vertical_alignment = 1
