@@ -40,7 +40,7 @@ func _on_restart_pressed() -> void:
 	AudioManager.play_button_click()
 	
 	# Show interstitial before restarting
-	if not IAPManager.is_no_ads_purchased() and AdManager.is_interstitial_loaded:
+	if not IAPManager.is_no_ads_purchased() and AdManager.is_interstitial_ready():
 		AdManager.show_interstitial()
 		# Wait for interstitial to close, then restart
 	else:

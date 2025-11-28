@@ -189,12 +189,13 @@ func _create_falling_piece(overhang: float) -> void:
 	falling_piece.size = Vector2(piece_width, block_height)
 	falling_piece.color = block_color.darkened(0.2)
 	
-	# Position the falling piece
+	# Position the falling piece - calculate offset from center
+	var half_remaining = (block_width - piece_width) / 2
 	var piece_x: float
 	if overhang > 0:
-		piece_x = position.x + block_width / 2 - piece_width / 2
+		piece_x = position.x + half_remaining
 	else:
-		piece_x = position.x - block_width / 2 + piece_width / 2
+		piece_x = position.x - half_remaining
 	
 	# Add to parent and animate falling
 	var falling_node = Node2D.new()

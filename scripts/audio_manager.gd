@@ -17,6 +17,10 @@ var music_player: AudioStreamPlayer
 var sfx_players: Array[AudioStreamPlayer] = []
 const MAX_SFX_PLAYERS: int = 8
 
+# Pre-calculated volume values (in dB)
+var _music_volume_db: float = 0.0
+var _sfx_volume_db: float = 0.0
+
 # Save file path
 const SAVE_PATH: String = "user://audio_settings.save"
 
@@ -32,9 +36,15 @@ var sounds: Dictionary = {}
 
 func _ready() -> void:
 	_load_settings()
+	_update_volume_db()
 	_setup_audio_players()
 	_load_sounds()
 	print("AudioManager initialized. Music: ", music_enabled, ", SFX: ", sfx_enabled)
+
+## Update pre-calculated volume values
+func _update_volume_db() -> void:
+	_music_volume_db = linear_to_db(music_volume)
+	_sfx_volume_db = linear_to_db(sfx_volume)
 
 ## Setup audio stream players
 func _setup_audio_players() -> void:
@@ -86,13 +96,13 @@ func play_sfx(sound_name: String) -> void:
 	for player in sfx_players:
 		if not player.playing:
 			player.stream = sound
-			player.volume_db = linear_to_db(sfx_volume)
+			player.volume_db = _sfx_volume_db
 			player.play()
 			return
 	
 	# All players busy, use first one
 	sfx_players[0].stream = sound
-	sfx_players[0].volume_db = linear_to_db(sfx_volume)
+	sfx_players[0].volume_db = _sfx_volume_db
 	sfx_players[0].play()
 
 ## Play background music
@@ -103,7 +113,7 @@ func play_music(music_path: String = "res://assets/sounds/background_music.ogg")
 	if ResourceLoader.exists(music_path):
 		var music = load(music_path)
 		music_player.stream = music
-		music_player.volume_db = linear_to_db(music_volume)
+		music_player.volume_db = _music_volume_db
 		music_player.play()
 		print("Playing music: ", music_path)
 	else:
@@ -138,12 +148,14 @@ func toggle_sfx() -> void:
 ## Set music volume (0.0 to 1.0)
 func set_music_volume(volume: float) -> void:
 	music_volume = clamp(volume, 0.0, 1.0)
-	music_player.volume_db = linear_to_db(music_volume)
+	_music_volume_db = linear_to_db(music_volume)
+	music_player.volume_db = _music_volume_db
 	_save_settings()
 
 ## Set SFX volume (0.0 to 1.0)
 func set_sfx_volume(volume: float) -> void:
 	sfx_volume = clamp(volume, 0.0, 1.0)
+	_sfx_volume_db = linear_to_db(sfx_volume)
 	_save_settings()
 
 ## Check if music is enabled

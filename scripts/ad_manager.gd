@@ -159,6 +159,10 @@ func show_rewarded() -> void:
 func is_rewarded_ready() -> bool:
 	return is_rewarded_loaded
 
+## Check if interstitial ad is ready
+func is_interstitial_ready() -> bool:
+	return is_interstitial_loaded
+
 ## Update ads enabled state (called when No Ads is purchased)
 func disable_ads() -> void:
 	ads_enabled = false
