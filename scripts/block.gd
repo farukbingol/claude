@@ -25,7 +25,7 @@ var placed_block_color: Color = Color(0.3, 0.5, 0.7)
 
 # Physics for falling
 var velocity: Vector2 = Vector2.ZERO
-var gravity: float = 1500.0  # Faster gravity for snappier gameplay
+var gravity: float = 1500.0
 
 # Reference to previous block for overlap calculation
 var previous_block: Block = null
@@ -36,6 +36,8 @@ var has_checked_landing: bool = false  # Flag to check landing once
 var color_rect: ColorRect
 
 func _ready() -> void:
+	# Initialize gravity from config
+	gravity = GameConfig.BLOCK_GRAVITY
 	_setup_visuals()
 
 ## Setup visual representation
@@ -52,6 +54,7 @@ func initialize(width: float, height: float, speed: float, color: Color, start_f
 	block_height = height
 	move_speed = speed
 	block_color = color
+	placed_block_color = color.darkened(0.2)
 	
 	# Set initial direction based on starting position
 	move_direction = 1 if start_from_left else -1
@@ -102,7 +105,7 @@ func _handle_falling(delta: float) -> void:
 			return
 	
 	# Check if off screen (complete miss with no previous block or after landing check)
-	if position.y > 2500:  # Well below screen
+	if position.y > GameConfig.BLOCK_FALL_OFF_Y:
 		block_dropped.emit()
 		queue_free()
 
@@ -111,9 +114,10 @@ func _check_landing() -> void:
 	var overlap = _calculate_overlap()
 	
 	if overlap <= 0:
-		# Complete miss - continue falling off screen
+		# Complete miss - emit game over signal and fall off screen
 		AudioManager.play_block_drop()
-		has_checked_landing = false  # Allow further falling
+		block_dropped.emit()
+		queue_free()
 		return
 	
 	# Block will be placed
@@ -166,7 +170,7 @@ func _calculate_overhang() -> float:
 func _handle_placement(overhang: float) -> void:
 	var abs_overhang = abs(overhang)
 	
-	if abs_overhang < 5.0:  # Perfect placement threshold
+	if abs_overhang < GameConfig.PERFECT_THRESHOLD:  # Perfect placement threshold
 		# Perfect placement - snap to center
 		position.x = previous_block.position.x
 		_place_block()
@@ -177,9 +181,10 @@ func _handle_placement(overhang: float) -> void:
 		var new_width = block_width - abs_overhang
 		
 		if new_width <= 0:
-			# Complete miss
+			# Complete miss - emit game over signal
 			AudioManager.play_block_drop()
-			block_placed.emit(block_width)  # Report full width as miss
+			block_dropped.emit()
+			queue_free()
 			return
 		
 		# Slice the block - create falling piece
@@ -207,7 +212,7 @@ func _create_falling_piece(overhang: float) -> void:
 	var falling_piece = ColorRect.new()
 	var piece_width = abs(overhang)
 	falling_piece.size = Vector2(piece_width, block_height)
-	falling_piece.color = block_color.darkened(0.2)
+	falling_piece.color = block_color.darkened(0.3)
 	
 	# Position the falling piece - calculate offset from center
 	var half_remaining = (block_width - piece_width) / 2
@@ -224,10 +229,12 @@ func _create_falling_piece(overhang: float) -> void:
 	falling_node.add_child(falling_piece)
 	get_parent().add_child(falling_node)
 	
-	# Create simple falling animation
+	# Create simple falling animation with fade out
 	var tween = create_tween()
+	tween.set_parallel(true)
 	tween.tween_property(falling_node, "position:y", position.y + 1500, 1.5)
-	tween.tween_property(falling_node, "modulate:a", 0.0, 0.5)
+	tween.tween_property(falling_node, "rotation", overhang * GameConfig.FALLING_PIECE_ROTATION, 1.5)  # Slight rotation
+	tween.chain().tween_property(falling_node, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(falling_node.queue_free)
 
 ## Place the block (stop movement)
@@ -235,6 +242,18 @@ func _place_block() -> void:
 	current_state = BlockState.PLACED
 	velocity = Vector2.ZERO
 	color_rect.color = placed_block_color
+	
+	# Add bounce animation
+	_add_bounce_animation()
+
+## Add bounce animation when block is placed
+func _add_bounce_animation() -> void:
+	var original_scale = scale
+	scale = Vector2(1.1, 0.9)  # Squash effect
+	var tween = create_tween()
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_ELASTIC)
+	tween.tween_property(self, "scale", original_scale, 0.3)
 
 ## Get the current width of the block
 func get_width() -> float:

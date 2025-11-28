@@ -30,6 +30,7 @@ const SFX_PERFECT: String = "perfect"
 const SFX_GAME_OVER: String = "game_over"
 const SFX_BUTTON_CLICK: String = "button_click"
 const SFX_BLOCK_DROP: String = "block_drop"
+const SFX_COMBO: String = "combo"
 
 # Preloaded sounds (placeholder - actual sounds would be loaded from files)
 var sounds: Dictionary = {}
@@ -69,7 +70,8 @@ func _load_sounds() -> void:
 		SFX_PERFECT: "res://assets/sounds/perfect.wav",
 		SFX_GAME_OVER: "res://assets/sounds/game_over.wav",
 		SFX_BUTTON_CLICK: "res://assets/sounds/button_click.wav",
-		SFX_BLOCK_DROP: "res://assets/sounds/block_drop.wav"
+		SFX_BLOCK_DROP: "res://assets/sounds/block_drop.wav",
+		SFX_COMBO: "res://assets/sounds/combo.wav"
 	}
 	
 	for sound_name in sound_files:
@@ -211,3 +213,7 @@ func play_button_click() -> void:
 ## Play block drop sound
 func play_block_drop() -> void:
 	play_sfx(SFX_BLOCK_DROP)
+
+## Play combo sound
+func play_combo() -> void:
+	play_sfx(SFX_COMBO)

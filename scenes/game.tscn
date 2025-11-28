@@ -34,6 +34,23 @@ theme_override_font_sizes/font_size = 36
 text = "BEST: 0"
 horizontal_alignment = 2
 
+[node name="SpeedIndicator" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 110.0
+offset_right = 300.0
+offset_bottom = 150.0
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 24
+text = "SPEED: 37%"
+
+[node name="PauseButton" type="Button" parent="UI"]
+offset_left = 980.0
+offset_top = 110.0
+offset_right = 1060.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 32
+text = "| |"
+
 [node name="PerfectLabel" type="Label" parent="UI"]
 visible = false
 offset_left = 340.0
@@ -43,6 +60,18 @@ offset_bottom = 900.0
 theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 theme_override_font_sizes/font_size = 48
 text = "PERFECT!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="UI"]
+visible = false
+offset_left = 290.0
+offset_top = 700.0
+offset_right = 790.0
+offset_bottom = 800.0
+theme_override_colors/font_color = Color(1, 0.5, 0.2, 1)
+theme_override_font_sizes/font_size = 56
+text = "COMBO x2!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -73,3 +102,68 @@ grow_vertical = 2
 text = "Banner Ad Area"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PauseMenu" type="Control" parent="UI"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PauseBackground" type="ColorRect" parent="UI/PauseMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="PauseContainer" type="VBoxContainer" parent="UI/PauseMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -200.0
+offset_right = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="PauseTitle" type="Label" parent="UI/PauseMenu/PauseContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UI/PauseMenu/PauseContainer"]
+custom_minimum_size = Vector2(250, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
+text = "RESUME"
+
+[node name="SettingsButton" type="Button" parent="UI/PauseMenu/PauseContainer"]
+custom_minimum_size = Vector2(250, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="UI/PauseMenu/PauseContainer"]
+custom_minimum_size = Vector2(250, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
+text = "QUIT"
+
+[connection signal="pressed" from="UI/PauseButton" to="." method="_on_pause_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/PauseContainer/ResumeButton" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/PauseContainer/SettingsButton" to="." method="_on_pause_settings_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/PauseContainer/QuitButton" to="." method="_on_pause_quit_pressed"]

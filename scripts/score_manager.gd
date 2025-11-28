@@ -9,15 +9,6 @@ signal high_score_changed(new_high_score: int)
 var current_score: int = 0
 var high_score: int = 0
 
-# Scoring constants
-const PERFECT_BONUS: int = 100
-const NORMAL_SCORE: int = 10
-const COMBO_MULTIPLIER: float = 1.5
-
-# Combo tracking
-var perfect_combo: int = 0
-var max_combo: int = 0
-
 # Save file path
 const SAVE_PATH: String = "user://score_data.save"
 
@@ -25,19 +16,8 @@ func _ready() -> void:
 	load_high_score()
 	print("ScoreManager initialized. High score: ", high_score)
 
-## Add score with optional combo multiplier
-func add_score(base_points: int, is_perfect: bool = false) -> void:
-	var points = base_points
-	
-	if is_perfect:
-		perfect_combo += 1
-		if perfect_combo > 1:
-			# Apply combo multiplier for consecutive perfects
-			points = int(points * (1.0 + (perfect_combo - 1) * 0.5))
-		max_combo = max(max_combo, perfect_combo)
-	else:
-		perfect_combo = 0
-	
+## Add score with optional perfect flag
+func add_score(points: int, is_perfect: bool = false) -> void:
 	current_score += points
 	score_changed.emit(current_score)
 	
@@ -49,8 +29,6 @@ func add_score(base_points: int, is_perfect: bool = false) -> void:
 ## Reset score for new game
 func reset_score() -> void:
 	current_score = 0
-	perfect_combo = 0
-	max_combo = 0
 	score_changed.emit(current_score)
 
 ## Save high score to local storage
@@ -58,8 +36,7 @@ func save_high_score() -> void:
 	var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if save_file:
 		var save_data = {
-			"high_score": high_score,
-			"max_combo": max_combo
+			"high_score": high_score
 		}
 		save_file.store_var(save_data)
 		save_file.close()
@@ -76,11 +53,9 @@ func load_high_score() -> void:
 			save_file.close()
 			if save_data is Dictionary:
 				high_score = save_data.get("high_score", 0)
-				max_combo = save_data.get("max_combo", 0)
 				print("High score loaded: ", high_score)
 	else:
 		high_score = 0
-		max_combo = 0
 
 ## Get formatted score string
 func get_score_text() -> String:
