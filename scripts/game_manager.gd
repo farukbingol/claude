@@ -95,15 +95,15 @@ func on_block_placed(overlap_amount: float) -> void:
 		
 		# Calculate combo multiplier
 		var multiplier = 1.0
-		if current_combo >= 2:
-			multiplier = GameConfig.COMBO_BASE_MULTIPLIER + (current_combo - 2) * GameConfig.COMBO_INCREMENT
+		if current_combo >= GameConfig.COMBO_START_THRESHOLD:
+			multiplier = GameConfig.COMBO_BASE_MULTIPLIER + (current_combo - GameConfig.COMBO_START_THRESHOLD) * GameConfig.COMBO_INCREMENT
 		
 		var points = int(GameConfig.PERFECT_BONUS * multiplier)
 		ScoreManager.add_score(points, true)
 		
 		perfect_placement.emit()
 		
-		if current_combo >= 2:
+		if current_combo >= GameConfig.COMBO_START_THRESHOLD:
 			combo_achieved.emit(current_combo)
 		
 		print("Perfect placement! Combo: ", current_combo, " Points: ", points)

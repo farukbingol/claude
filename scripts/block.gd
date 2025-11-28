@@ -233,7 +233,7 @@ func _create_falling_piece(overhang: float) -> void:
 	var tween = create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(falling_node, "position:y", position.y + 1500, 1.5)
-	tween.tween_property(falling_node, "rotation", overhang * 0.05, 1.5)  # Slight rotation
+	tween.tween_property(falling_node, "rotation", overhang * GameConfig.FALLING_PIECE_ROTATION, 1.5)  # Slight rotation
 	tween.chain().tween_property(falling_node, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(falling_node.queue_free)
 

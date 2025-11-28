@@ -268,19 +268,19 @@ func _scroll_view() -> void:
 
 func _update_background_gradient() -> void:
 	# Update gradient colors based on tower height
-	var height_factor = min(len(placed_blocks) / 50.0, 1.0)  # Full gradient change at 50 blocks
+	var height_factor = min(len(placed_blocks) / GameConfig.BG_GRADIENT_BLOCKS_FOR_FULL_CHANGE, 1.0)  # Full gradient change at configured blocks
 	
 	if gradient_texture and gradient_texture.gradient:
 		var gradient = gradient_texture.gradient
-		var base_index = int(height_factor * 3)  # Shift through color palette
+		var base_index = int(height_factor * (len(GameConfig.BG_COLORS) - GameConfig.BG_GRADIENT_TRANSITION_RANGE - 1))  # Shift through color palette
 		
-		if base_index < len(GameConfig.BG_COLORS) - 4:
+		if base_index < len(GameConfig.BG_COLORS) - GameConfig.BG_GRADIENT_TRANSITION_RANGE:
 			gradient.colors[0] = GameConfig.BG_COLORS[base_index]
 			gradient.colors[1] = GameConfig.BG_COLORS[base_index + 1]
 			gradient.colors[2] = GameConfig.BG_COLORS[base_index + 2]
 			gradient.colors[3] = GameConfig.BG_COLORS[base_index + 3]
-			if base_index + 4 < len(GameConfig.BG_COLORS):
-				gradient.colors[4] = GameConfig.BG_COLORS[base_index + 4]
+			if base_index + GameConfig.BG_GRADIENT_TRANSITION_RANGE < len(GameConfig.BG_COLORS):
+				gradient.colors[4] = GameConfig.BG_COLORS[base_index + GameConfig.BG_GRADIENT_TRANSITION_RANGE]
 
 func _on_perfect_placement() -> void:
 	_show_perfect_text()
