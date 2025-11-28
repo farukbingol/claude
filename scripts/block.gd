@@ -252,4 +252,3 @@ func set_screen_width(width: float) -> void:
 func place_immediately() -> void:
 	current_state = BlockState.PLACED
 	velocity = Vector2.ZERO
-	# Keep the original color for base block
