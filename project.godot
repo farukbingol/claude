@@ -19,12 +19,14 @@ config/icon="res://assets/images/icon.png"
 
 [autoload]
 
+GameConfig="*res://config/game_config.gd"
 GameManager="*res://scripts/game_manager.gd"
 ScoreManager="*res://scripts/score_manager.gd"
 AdManager="*res://scripts/ad_manager.gd"
 IAPManager="*res://scripts/iap_manager.gd"
 AudioManager="*res://scripts/audio_manager.gd"
 AdsConfig="*res://config/ads_config.gd"
+StatsManager="*res://scripts/stats_manager.gd"
 
 [display]
 

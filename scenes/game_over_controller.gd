@@ -6,10 +6,13 @@ extends Control
 @onready var high_score_label: Label = $VBoxContainer/HighScoreLabel
 @onready var new_record_label: Label = $VBoxContainer/NewRecordLabel
 @onready var watch_ad_button: Button = $VBoxContainer/WatchAdButton
+@onready var blocks_placed_label: Label = $VBoxContainer/StatsContainer/BlocksPlacedLabel
+@onready var perfects_label: Label = $VBoxContainer/StatsContainer/PerfectsLabel
+@onready var max_combo_label: Label = $VBoxContainer/StatsContainer/MaxComboLabel
 
 func _ready() -> void:
 	_update_ui()
-	_load_interstitial()
+	_handle_interstitial()
 	
 	# Connect ad signals
 	AdManager.rewarded_ad_earned.connect(_on_rewarded_earned)
@@ -28,19 +31,29 @@ func _update_ui() -> void:
 	# Show new record label if applicable
 	new_record_label.visible = ScoreManager.is_new_high_score()
 	
+	# Get game stats
+	var stats = GameManager.get_game_stats()
+	blocks_placed_label.text = "Blocks Placed: " + str(stats.block_count)
+	perfects_label.text = "Perfect Placements: " + str(stats.perfect_count)
+	max_combo_label.text = "Max Combo: " + str(stats.max_combo)
+	
 	# Hide watch ad button if continue not available or no ads
 	watch_ad_button.visible = GameManager.continue_available and not IAPManager.is_no_ads_purchased()
 
-func _load_interstitial() -> void:
-	# Show interstitial ad after game over (if ads enabled)
+func _handle_interstitial() -> void:
+	# Only show interstitial if it's been enough games and ads are enabled
 	if not IAPManager.is_no_ads_purchased():
-		AdManager.load_interstitial()
+		if StatsManager.should_show_interstitial():
+			AdManager.load_interstitial()
+		else:
+			print("Skipping interstitial - not enough games since last one")
 
 func _on_restart_pressed() -> void:
 	AudioManager.play_button_click()
 	
-	# Show interstitial before restarting
-	if not IAPManager.is_no_ads_purchased() and AdManager.is_interstitial_ready():
+	# Show interstitial before restarting if it should be shown
+	if not IAPManager.is_no_ads_purchased() and StatsManager.should_show_interstitial() and AdManager.is_interstitial_ready():
+		StatsManager.reset_interstitial_counter()
 		AdManager.show_interstitial()
 		# Wait for interstitial to close, then restart
 	else:
@@ -57,7 +70,7 @@ func _on_watch_ad_pressed() -> void:
 		watch_ad_button.text = "LOADING AD..."
 		await get_tree().create_timer(2.0).timeout
 		if AdManager.is_rewarded_ready():
-			watch_ad_button.text = "WATCH AD TO CONTINUE"
+			watch_ad_button.text = "CONTINUE (WATCH AD)"
 		else:
 			watch_ad_button.text = "AD NOT AVAILABLE"
 

@@ -10,8 +10,12 @@ const Block = preload("res://scripts/block.gd")
 @onready var score_label: Label = $UI/TopBar/ScoreLabel
 @onready var high_score_label: Label = $UI/TopBar/HighScoreLabel
 @onready var perfect_label: Label = $UI/PerfectLabel
+@onready var combo_label: Label = $UI/ComboLabel
 @onready var tap_hint: Label = $UI/TapHint
 @onready var banner_placeholder: ColorRect = $UI/BannerPlaceholder
+@onready var pause_button: Button = $UI/PauseButton
+@onready var pause_menu: Control = $UI/PauseMenu
+@onready var speed_indicator: Label = $UI/SpeedIndicator
 
 # Game settings
 var screen_width: float = 1080.0
@@ -26,26 +30,28 @@ var block_height: float = 50.0
 var current_block: Node2D = null
 var placed_blocks: Array = []
 
-# Block colors (rainbow gradient)
-var block_colors: Array[Color] = [
-	Color(0.9, 0.3, 0.3),   # Red
-	Color(0.9, 0.6, 0.3),   # Orange
-	Color(0.9, 0.9, 0.3),   # Yellow
-	Color(0.3, 0.9, 0.3),   # Green
-	Color(0.3, 0.9, 0.9),   # Cyan
-	Color(0.3, 0.3, 0.9),   # Blue
-	Color(0.6, 0.3, 0.9),   # Purple
-	Color(0.9, 0.3, 0.6),   # Pink
-]
+# Screen shake
+var shake_intensity: float = 0.0
+var original_camera_pos: Vector2 = Vector2.ZERO
+
+# Background gradient
+var gradient_texture: GradientTexture2D
 
 func _ready() -> void:
 	_setup_game()
+	_setup_gradient_background()
 	_update_ui()
 	
 	# Connect signals
 	ScoreManager.score_changed.connect(_on_score_changed)
 	ScoreManager.high_score_changed.connect(_on_high_score_changed)
 	GameManager.game_over.connect(_on_game_over)
+	GameManager.combo_achieved.connect(_on_combo_achieved)
+	GameManager.perfect_placement.connect(_on_perfect_placement)
+	GameManager.speed_increased.connect(_on_speed_increased)
+	
+	# Setup pause menu
+	_setup_pause_menu()
 	
 	# Show banner ad
 	if not IAPManager.is_no_ads_purchased():
@@ -56,6 +62,9 @@ func _ready() -> void:
 	# Start the game
 	GameManager.start_game()
 	_spawn_first_block()
+	
+	# Update speed indicator
+	_update_speed_indicator()
 
 func _setup_game() -> void:
 	# Get screen dimensions
@@ -71,9 +80,50 @@ func _setup_game() -> void:
 	base_block_y = screen_height - 220.0
 	block_spawn_y = 400.0
 
+func _setup_gradient_background() -> void:
+	# Create gradient for sky background
+	var gradient = Gradient.new()
+	gradient.offsets = [0.0, 0.25, 0.5, 0.75, 1.0]
+	gradient.colors = [
+		GameConfig.BG_COLORS[0],
+		GameConfig.BG_COLORS[1],
+		GameConfig.BG_COLORS[2],
+		GameConfig.BG_COLORS[3],
+		GameConfig.BG_COLORS[4]
+	]
+	
+	gradient_texture = GradientTexture2D.new()
+	gradient_texture.gradient = gradient
+	gradient_texture.width = int(screen_width)
+	gradient_texture.height = int(screen_height)
+	gradient_texture.fill = GradientTexture2D.FILL_LINEAR
+	gradient_texture.fill_from = Vector2(0.5, 1.0)
+	gradient_texture.fill_to = Vector2(0.5, 0.0)
+	
+	# Apply to background
+	var texture_rect = TextureRect.new()
+	texture_rect.texture = gradient_texture
+	texture_rect.size = Vector2(screen_width, screen_height)
+	texture_rect.position = Vector2.ZERO
+	texture_rect.z_index = -1
+	add_child(texture_rect)
+	
+	# Hide the original background
+	background.visible = false
+
+func _setup_pause_menu() -> void:
+	# Hide pause menu initially
+	if pause_menu:
+		pause_menu.visible = false
+
 func _update_ui() -> void:
 	score_label.text = "SCORE: " + ScoreManager.get_score_text()
 	high_score_label.text = "BEST: " + ScoreManager.get_high_score_text()
+
+func _update_speed_indicator() -> void:
+	if speed_indicator:
+		var speed_percent = int((GameManager.current_block_speed / GameManager.max_block_speed) * 100)
+		speed_indicator.text = "SPEED: " + str(speed_percent) + "%"
 
 func _spawn_first_block() -> void:
 	# Create base platform as a Block (so it can be used as previous_block reference)
@@ -117,8 +167,8 @@ func _spawn_block() -> void:
 	block_scene.position = Vector2(spawn_x, spawn_y)
 	
 	# Get color based on block count (subtract 1 because base block is in placed_blocks)
-	var color_index = (len(placed_blocks) - 1) % len(block_colors)
-	var block_color = block_colors[color_index]
+	var color_index = (len(placed_blocks) - 1) % len(GameConfig.BLOCK_COLORS)
+	var block_color = GameConfig.BLOCK_COLORS[color_index]
 	
 	# Initialize block
 	block_scene.set_screen_width(screen_width)
@@ -146,6 +196,19 @@ func _get_next_block_y() -> float:
 	var base_y = base_block_y - (len(placed_blocks) * block_height)
 	return min(base_y, block_spawn_y)
 
+func _process(delta: float) -> void:
+	# Handle screen shake
+	if shake_intensity > 0:
+		shake_intensity -= delta * 30.0
+		if shake_intensity <= 0:
+			shake_intensity = 0
+			blocks_container.position = Vector2.ZERO
+		else:
+			blocks_container.position = Vector2(
+				randf_range(-shake_intensity, shake_intensity),
+				randf_range(-shake_intensity, shake_intensity)
+			)
+
 func _input(event: InputEvent) -> void:
 	if not GameManager.is_playing():
 		return
@@ -169,7 +232,6 @@ func _on_block_placed(overlap_amount: float) -> void:
 	
 	# Check for perfect placement
 	if overlap_amount < 5.0:
-		_show_perfect_text()
 		GameManager.on_block_placed(0.0)
 	else:
 		GameManager.on_block_placed(overlap_amount)
@@ -177,15 +239,18 @@ func _on_block_placed(overlap_amount: float) -> void:
 	# Move camera up
 	_scroll_view()
 	
+	# Update background gradient based on height
+	_update_background_gradient()
+	
 	# Spawn next block
 	if GameManager.is_playing():
 		current_block = null
-		await get_tree().create_timer(0.3).timeout
+		await get_tree().create_timer(GameConfig.BLOCK_SPAWN_DELAY).timeout
 		if GameManager.is_playing():
 			_spawn_block()
 
 func _on_block_dropped() -> void:
-	# Block completely missed
+	# Block completely missed - GAME OVER
 	GameManager.end_game()
 
 func _scroll_view() -> void:
@@ -201,13 +266,71 @@ func _scroll_view() -> void:
 			if child is ColorRect:
 				child.position.y += scroll_amount
 
+func _update_background_gradient() -> void:
+	# Update gradient colors based on tower height
+	var height_factor = min(len(placed_blocks) / 50.0, 1.0)  # Full gradient change at 50 blocks
+	
+	if gradient_texture and gradient_texture.gradient:
+		var gradient = gradient_texture.gradient
+		var base_index = int(height_factor * 3)  # Shift through color palette
+		
+		if base_index < len(GameConfig.BG_COLORS) - 4:
+			gradient.colors[0] = GameConfig.BG_COLORS[base_index]
+			gradient.colors[1] = GameConfig.BG_COLORS[base_index + 1]
+			gradient.colors[2] = GameConfig.BG_COLORS[base_index + 2]
+			gradient.colors[3] = GameConfig.BG_COLORS[base_index + 3]
+			if base_index + 4 < len(GameConfig.BG_COLORS):
+				gradient.colors[4] = GameConfig.BG_COLORS[base_index + 4]
+
+func _on_perfect_placement() -> void:
+	_show_perfect_text()
+	# Add glow effect
+	_add_glow_effect()
+
 func _show_perfect_text() -> void:
 	perfect_label.visible = true
 	perfect_label.modulate.a = 1.0
+	perfect_label.scale = Vector2(1.5, 1.5)
 	
 	var tween = create_tween()
-	tween.tween_property(perfect_label, "modulate:a", 0.0, 1.0)
-	tween.tween_callback(func(): perfect_label.visible = false)
+	tween.set_parallel(true)
+	tween.tween_property(perfect_label, "modulate:a", 0.0, GameConfig.PERFECT_TEXT_DURATION)
+	tween.tween_property(perfect_label, "scale", Vector2(1.0, 1.0), 0.2)
+	tween.chain().tween_callback(func(): perfect_label.visible = false)
+
+func _on_combo_achieved(combo_count: int) -> void:
+	_show_combo_text(combo_count)
+	_trigger_screen_shake()
+	AudioManager.play_combo()
+
+func _show_combo_text(combo_count: int) -> void:
+	if combo_label:
+		combo_label.text = "COMBO x" + str(combo_count) + "!"
+		combo_label.visible = true
+		combo_label.modulate.a = 1.0
+		combo_label.scale = Vector2(2.0, 2.0)
+		
+		var tween = create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(combo_label, "modulate:a", 0.0, GameConfig.COMBO_TEXT_DURATION)
+		tween.tween_property(combo_label, "scale", Vector2(1.0, 1.0), 0.3)
+		tween.chain().tween_callback(func(): combo_label.visible = false)
+
+func _trigger_screen_shake() -> void:
+	shake_intensity = GameConfig.SCREEN_SHAKE_INTENSITY
+
+func _add_glow_effect() -> void:
+	# Add a simple flash effect on the last placed block
+	if len(placed_blocks) > 0:
+		var last_block = placed_blocks[-1]
+		if is_instance_valid(last_block):
+			var original_modulate = last_block.modulate
+			last_block.modulate = Color(1.5, 1.5, 1.5, 1.0)  # Bright flash
+			var tween = create_tween()
+			tween.tween_property(last_block, "modulate", original_modulate, 0.3)
+
+func _on_speed_increased(new_speed: float) -> void:
+	_update_speed_indicator()
 
 func _on_score_changed(new_score: int) -> void:
 	score_label.text = "SCORE: " + str(new_score)
@@ -222,3 +345,22 @@ func _on_game_over() -> void:
 	# Wait a moment then show game over screen
 	await get_tree().create_timer(0.5).timeout
 	get_tree().change_scene_to_file("res://scenes/game_over.tscn")
+
+func _on_pause_pressed() -> void:
+	if pause_menu:
+		pause_menu.visible = true
+		GameManager.pause_game()
+
+func _on_resume_pressed() -> void:
+	if pause_menu:
+		pause_menu.visible = false
+		GameManager.resume_game()
+
+func _on_pause_settings_pressed() -> void:
+	# Could open settings overlay
+	AudioManager.play_button_click()
+
+func _on_pause_quit_pressed() -> void:
+	if pause_menu:
+		pause_menu.visible = false
+	GameManager.go_to_menu()
