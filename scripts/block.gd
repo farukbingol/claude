@@ -25,10 +25,12 @@ var placed_block_color: Color = Color(0.3, 0.5, 0.7)
 
 # Physics for falling
 var velocity: Vector2 = Vector2.ZERO
-var gravity: float = 980.0
+var gravity: float = 1500.0  # Faster gravity for snappier gameplay
 
 # Reference to previous block for overlap calculation
 var previous_block: Block = null
+var target_y: float = 0.0  # Y position where block should land
+var has_checked_landing: bool = false  # Flag to check landing once
 
 # Visual components
 var color_rect: ColorRect
@@ -91,10 +93,32 @@ func _handle_falling(delta: float) -> void:
 	velocity.y += gravity * delta
 	position.y += velocity.y * delta
 	
-	# Check if off screen
+	# Check if reached target landing position
+	if previous_block != null and not has_checked_landing:
+		if position.y >= target_y:
+			position.y = target_y
+			has_checked_landing = true
+			_check_landing()
+			return
+	
+	# Check if off screen (complete miss with no previous block or after landing check)
 	if position.y > 2500:  # Well below screen
 		block_dropped.emit()
 		queue_free()
+
+## Check landing and handle placement or miss
+func _check_landing() -> void:
+	var overlap = _calculate_overlap()
+	
+	if overlap <= 0:
+		# Complete miss - continue falling off screen
+		AudioManager.play_block_drop()
+		has_checked_landing = false  # Allow further falling
+		return
+	
+	# Block will be placed
+	var overhang = _calculate_overhang()
+	_handle_placement(overhang)
 
 ## Drop and place the block
 func drop_block() -> void:
@@ -103,22 +127,18 @@ func drop_block() -> void:
 	
 	current_state = BlockState.FALLING
 	velocity = Vector2.ZERO
+	has_checked_landing = false
 	
-	# Calculate overlap with previous block
+	# Calculate target Y position (where the block should land)
 	if previous_block != null:
-		var overlap = _calculate_overlap()
-		
-		if overlap <= 0:
-			# Complete miss - continue falling off screen
-			AudioManager.play_block_drop()
-			return
-		
-		# Block will be placed
-		var overhang = _calculate_overhang()
-		_handle_placement(overhang)
+		# Land on top of previous block
+		target_y = previous_block.position.y - block_height
 	else:
-		# First block - just place it
+		# No previous block - this shouldn't happen with new logic
+		# but handle it by placing immediately
 		_place_block()
+		AudioManager.play_block_place()
+		block_placed.emit(0.0)
 
 ## Calculate overlap amount with previous block
 func _calculate_overlap() -> float:
@@ -227,3 +247,9 @@ func is_placed() -> bool:
 ## Set screen width for boundary calculation
 func set_screen_width(width: float) -> void:
 	screen_width = width
+
+## Place block immediately without animation (for base block)
+func place_immediately() -> void:
+	current_state = BlockState.PLACED
+	velocity = Vector2.ZERO
+	# Keep the original color for base block

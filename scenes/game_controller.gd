@@ -6,6 +6,7 @@ extends Node2D
 const Block = preload("res://scripts/block.gd")
 
 @onready var blocks_container: Node2D = $BlocksContainer
+@onready var background: ColorRect = $Background
 @onready var score_label: Label = $UI/TopBar/ScoreLabel
 @onready var high_score_label: Label = $UI/TopBar/HighScoreLabel
 @onready var perfect_label: Label = $UI/PerfectLabel
@@ -62,6 +63,10 @@ func _setup_game() -> void:
 	screen_width = viewport_size.x
 	screen_height = viewport_size.y
 	
+	# Resize background to fill the entire screen
+	background.size = Vector2(screen_width, screen_height)
+	background.position = Vector2.ZERO
+	
 	# Adjust base block position
 	base_block_y = screen_height - 220.0
 	block_spawn_y = 400.0
@@ -71,15 +76,29 @@ func _update_ui() -> void:
 	high_score_label.text = "BEST: " + ScoreManager.get_high_score_text()
 
 func _spawn_first_block() -> void:
-	# Create base platform
-	var base_platform = ColorRect.new()
-	base_platform.size = Vector2(GameManager.base_block_width, block_height)
-	base_platform.position = Vector2(
-		screen_width / 2 - GameManager.base_block_width / 2,
-		base_block_y - block_height / 2
+	# Create base platform as a Block (so it can be used as previous_block reference)
+	var base_block = Node2D.new()
+	base_block.set_script(Block)
+	blocks_container.add_child(base_block)
+	
+	# Position at center bottom
+	base_block.position = Vector2(screen_width / 2, base_block_y)
+	
+	# Initialize as a static block
+	base_block.set_screen_width(screen_width)
+	base_block.initialize(
+		GameManager.base_block_width,
+		block_height,
+		0.0,  # No movement speed
+		Color(0.4, 0.4, 0.5),
+		true
 	)
-	base_platform.color = Color(0.4, 0.4, 0.5)
-	blocks_container.add_child(base_platform)
+	
+	# Set as placed immediately (static base)
+	base_block.place_immediately()
+	
+	# Add to placed blocks so next block can use it as reference
+	placed_blocks.append(base_block)
 	
 	# Spawn first moving block
 	_spawn_block()
@@ -90,15 +109,15 @@ func _spawn_block() -> void:
 	block_scene.set_script(Block)
 	blocks_container.add_child(block_scene)
 	
-	# Calculate spawn position
+	# Calculate spawn position - block starts at center top and moves horizontally
 	var spawn_y = _get_next_block_y()
-	var spawn_x = 0.0 if len(placed_blocks) % 2 == 0 else screen_width
-	var start_from_left = len(placed_blocks) % 2 == 0
+	var spawn_x = screen_width / 2  # Start at center
+	var start_from_left = len(placed_blocks) % 2 == 0  # Alternate initial direction
 	
 	block_scene.position = Vector2(spawn_x, spawn_y)
 	
-	# Get color based on block count
-	var color_index = len(placed_blocks) % len(block_colors)
+	# Get color based on block count (subtract 1 because base block is in placed_blocks)
+	var color_index = (len(placed_blocks) - 1) % len(block_colors)
 	var block_color = block_colors[color_index]
 	
 	# Initialize block
