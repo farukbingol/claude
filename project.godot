@@ -13,7 +13,7 @@ config_version=5
 config/name="Tower Stacking"
 config/description="A fun tower stacking game for Android"
 run/main_scene="res://scenes/main_menu.tscn"
-config/features=PackedStringArray("4.2", "Mobile")
+config/features=PackedStringArray("4.5", "Mobile")
 boot_splash/bg_color=Color(0.141176, 0.141176, 0.141176, 1)
 config/icon="res://assets/images/icon.png"
 
@@ -33,9 +33,9 @@ StatsManager="*res://scripts/stats_manager.gd"
 window/size/viewport_width=1080
 window/size/viewport_height=1920
 window/size/mode=2
-window/handheld/orientation=1
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=1
 
 [input]
 
