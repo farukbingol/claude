@@ -1,0 +1,41 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+
+# Imported translations (for editor only)
+*.import
+
+# Build outputs
+*.apk
+*.aab
+*.keystore
+android/build/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# Mono-specific ignores
+.mono/
+data_*/
+
+# Export templates
+export_templates/
+
+# Temporary files
+*.tmp
+*.bak
