@@ -24,13 +24,20 @@ func _ready() -> void:
 
 ## Check if a boss should spawn at this block level
 func check_boss_spawn(block_count: int) -> void:
+	# First element is base platform, subtract it
+	var actual_blocks = block_count - 1
+	
+	# No blocks placed yet (only base platform exists)
+	if actual_blocks < 1:
+		return
+	
 	# Calculate effective level (loops every 100 blocks)
-	var effective_level = block_count % 100
-	if effective_level == 0 and block_count > 0:
+	var effective_level = actual_blocks % 100
+	if effective_level == 0 and actual_blocks > 0:
 		effective_level = 100
 	
 	# Calculate difficulty cycle (how many times we've looped)
-	difficulty_cycle = block_count / 100
+	difficulty_cycle = actual_blocks / 100
 	
 	# Check if we're at a boss level
 	for i in range(len(GameConfig.BOSS_LEVELS)):
