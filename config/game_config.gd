@@ -118,6 +118,7 @@ const NO_ADS_DIAMOND_COST: int = 500  # Cost to remove ads with diamonds
 const CAMERA_SCROLL_START_BLOCK: int = 6  # Start scrolling after this many blocks
 const CAMERA_SCROLL_SPEED: float = 0.3  # Smooth scroll duration
 const CAMERA_LERP_SPEED: float = 5.0  # Camera lerp multiplier for responsive tracking
+const CAMERA_TOP_VISIBILITY_THRESHOLD: float = 0.3  # Screen height fraction - move camera if block above this
 const MIN_VISIBLE_BLOCKS: int = 20  # Minimum blocks to keep visible when cleaning up
 const BLOCK_CLEANUP_THRESHOLD: int = 50  # Start cleaning up blocks after this many
 
