@@ -43,6 +43,16 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 28
 text = "SPEED: 37%"
 
+[node name="WindIndicator" type="Label" parent="UI"]
+visible = false
+offset_left = 20.0
+offset_top = 155.0
+offset_right = 300.0
+offset_bottom = 195.0
+theme_override_colors/font_color = Color(0.6, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "WIND: ~~~"
+
 [node name="PauseButton" type="Button" parent="UI"]
 offset_left = 980.0
 offset_top = 110.0

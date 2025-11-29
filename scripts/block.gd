@@ -15,6 +15,10 @@ var move_direction: int = 1  # 1 = right, -1 = left
 var move_speed: float = 300.0
 var screen_width: float = 1080.0
 
+# Wind effect
+var wind_strength: float = 0.0  # Applied wind force
+var wind_time: float = 0.0  # Time accumulator for wind oscillation
+
 # Block dimensions
 var block_width: float = 200.0
 var block_height: float = 50.0
@@ -80,6 +84,12 @@ func _process(delta: float) -> void:
 
 ## Handle horizontal movement
 func _handle_movement(delta: float) -> void:
+	# Apply wind effect if enabled
+	if wind_strength > 0:
+		wind_time += delta
+		var wind_offset = sin(wind_time * 2.0) * wind_strength * delta
+		position.x += wind_offset
+	
 	position.x += move_direction * move_speed * delta
 	
 	# Bounce off screen edges
@@ -90,6 +100,11 @@ func _handle_movement(delta: float) -> void:
 	elif position.x - half_width <= 0:
 		position.x = half_width
 		move_direction = 1
+
+## Set wind strength for this block
+func set_wind_strength(strength: float) -> void:
+	wind_strength = strength
+	wind_time = randf() * 3.0  # Random starting phase
 
 ## Handle falling physics
 func _handle_falling(delta: float) -> void:

@@ -28,6 +28,12 @@ const COMBO_START_THRESHOLD: int = 2  # Combo starts counting from this number o
 const BLOCK_GRAVITY: float = 1500.0
 const BLOCK_FALL_OFF_Y: float = 2500.0  # Y position where block is considered fallen off
 
+# ============= WIND SETTINGS =============
+const WIND_START_BLOCKS: int = 50  # Wind starts affecting blocks after this many blocks
+const WIND_BASE_STRENGTH: float = 100.0  # Base wind oscillation strength
+const WIND_MAX_STRENGTH: float = 300.0  # Maximum wind strength
+const WIND_RAMP_BLOCKS: int = 50  # Blocks over which wind reaches max strength
+
 # ============= VISUAL SETTINGS =============
 # Block color palette (as per requirements)
 const BLOCK_COLORS: Array = [

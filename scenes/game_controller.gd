@@ -16,6 +16,7 @@ const Block = preload("res://scripts/block.gd")
 @onready var pause_button: Button = $UI/PauseButton
 @onready var pause_menu: Control = $UI/PauseMenu
 @onready var speed_indicator: Label = $UI/SpeedIndicator
+@onready var wind_indicator: Label = $UI/WindIndicator
 
 # Game settings
 var screen_width: float = 1080.0
@@ -129,6 +130,18 @@ func _update_speed_indicator() -> void:
 		var color_factor = clamp((GameManager.current_block_speed - GameManager.base_block_speed) / (GameManager.max_block_speed - GameManager.base_block_speed), 0.0, 1.0)
 		speed_indicator.modulate = Color(1.0, 1.0 - color_factor * 0.6, 1.0 - color_factor * 0.7)
 
+func _update_wind_indicator() -> void:
+	if wind_indicator:
+		var block_count = len(placed_blocks)
+		if block_count >= GameConfig.WIND_START_BLOCKS:
+			wind_indicator.visible = true
+			var wind_progress = min(float(block_count - GameConfig.WIND_START_BLOCKS) / GameConfig.WIND_RAMP_BLOCKS, 1.0)
+			var wave_count = 1 + int(wind_progress * 4)  # 1-5 waves
+			var waves = "~".repeat(wave_count)
+			wind_indicator.text = "WIND: " + waves
+		else:
+			wind_indicator.visible = false
+
 func _spawn_first_block() -> void:
 	# Create base platform as a Block (so it can be used as previous_block reference)
 	var base_block = Node2D.new()
@@ -183,6 +196,13 @@ func _spawn_block() -> void:
 		block_color,
 		start_from_left
 	)
+	
+	# Apply wind if we're above the wind threshold
+	var block_count = len(placed_blocks)
+	if block_count >= GameConfig.WIND_START_BLOCKS:
+		var wind_progress = min(float(block_count - GameConfig.WIND_START_BLOCKS) / GameConfig.WIND_RAMP_BLOCKS, 1.0)
+		var wind_strength = GameConfig.WIND_BASE_STRENGTH + wind_progress * (GameConfig.WIND_MAX_STRENGTH - GameConfig.WIND_BASE_STRENGTH)
+		block_scene.set_wind_strength(wind_strength)
 	
 	# Set reference to previous block
 	if len(placed_blocks) > 0:
@@ -245,6 +265,9 @@ func _on_block_placed(overlap_amount: float) -> void:
 	
 	# Update background gradient based on height
 	_update_background_gradient()
+	
+	# Update wind indicator
+	_update_wind_indicator()
 	
 	# Spawn next block
 	if GameManager.is_playing():
