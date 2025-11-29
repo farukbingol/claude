@@ -27,7 +27,8 @@ func check_boss_spawn(block_count: int) -> void:
 	# First element is base platform, subtract it
 	var actual_blocks = block_count - 1
 	
-	if actual_blocks <= 0:
+	# No blocks placed yet (only base platform exists)
+	if actual_blocks < 1:
 		return
 	
 	# Calculate effective level (loops every 100 blocks)

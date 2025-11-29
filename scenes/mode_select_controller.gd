@@ -65,7 +65,8 @@ func _create_mode_button(mode_id: String, mode: Dictionary) -> Control:
 	
 	# Create content with HBox - ensure it fills the button
 	var hbox = HBoxContainer.new()
-	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	hbox.add_theme_constant_override("separation", 15)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(hbox)

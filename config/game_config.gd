@@ -120,6 +120,8 @@ const CAMERA_SCROLL_SPEED: float = 0.3  # Smooth scroll duration
 const CAMERA_LERP_SPEED: float = 5.0  # Camera lerp multiplier for responsive tracking
 const MIN_VISIBLE_BLOCKS: int = 20  # Minimum blocks to keep visible when cleaning up
 const BLOCK_CLEANUP_THRESHOLD: int = 50  # Start cleaning up blocks after this many
+const CAMERA_TOP_THRESHOLD: float = 0.25  # Pull camera higher when block is above this screen fraction
+const CAMERA_TARGET_POSITION: float = 0.4  # Target screen position for top block (from top)
 
 # ============= DEVOPS SETTINGS =============
 const DEVOPS_CODE: String = "DEVOPS2024"

@@ -421,9 +421,9 @@ func _scroll_view() -> void:
 			var top_block = placed_blocks[-1]
 			if is_instance_valid(top_block):
 				var block_screen_y = top_block.position.y - target_camera_offset_y
-				# If block is above top 1/4 of screen, pull camera higher
-				if block_screen_y < screen_height * 0.25:
-					target_camera_offset_y = top_block.position.y - screen_height * 0.4
+				# If block is above top threshold of screen, pull camera higher
+				if block_screen_y < screen_height * GameConfig.CAMERA_TOP_THRESHOLD:
+					target_camera_offset_y = top_block.position.y - screen_height * GameConfig.CAMERA_TARGET_POSITION
 	
 	# Also update block positions if tower is very tall (cleanup old blocks)
 	if block_count > GameConfig.BLOCK_CLEANUP_THRESHOLD:
