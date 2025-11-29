@@ -408,31 +408,23 @@ func _on_block_dropped() -> void:
 	GameManager.end_game()
 
 func _scroll_view() -> void:
-	# Improved camera tracking - camera follows tower as it grows
 	var block_count = len(placed_blocks)
 	
-	# Start scrolling after CAMERA_SCROLL_START_BLOCK blocks
-	if block_count > GameConfig.CAMERA_SCROLL_START_BLOCK:
-		# Camera follows block height 1:1
-		target_camera_offset_y = (block_count - GameConfig.CAMERA_SCROLL_START_BLOCK) * block_height
-		
-		# Ensure the top block is always visible on screen
-		if len(placed_blocks) > 0:
-			var top_block = placed_blocks[-1]
-			if is_instance_valid(top_block):
-				var block_screen_y = top_block.position.y - target_camera_offset_y
-				# If block is above top threshold of screen, pull camera higher
-				if block_screen_y < screen_height * GameConfig.CAMERA_TOP_THRESHOLD:
-					target_camera_offset_y = top_block.position.y - screen_height * GameConfig.CAMERA_TARGET_POSITION
+	# Camera only starts scrolling after threshold
+	if block_count <= GameConfig.CAMERA_SCROLL_START_BLOCK:
+		target_camera_offset_y = 0.0
+		return
 	
-	# Also update block positions if tower is very tall (cleanup old blocks)
+	# For each new block, scroll up by exactly one block height
+	var blocks_to_scroll = block_count - GameConfig.CAMERA_SCROLL_START_BLOCK
+	target_camera_offset_y = blocks_to_scroll * block_height
+	
+	# Clean up old blocks when tower is very tall
 	if block_count > GameConfig.BLOCK_CLEANUP_THRESHOLD:
-		# Remove blocks that are far below the visible area
 		var visible_bottom = base_block_y + camera_offset_y + screen_height
 		for i in range(len(placed_blocks) - 1, -1, -1):
 			var block = placed_blocks[i]
 			if is_instance_valid(block) and block.position.y > visible_bottom + 500:
-				# Keep at least MIN_VISIBLE_BLOCKS blocks visible
 				if i < len(placed_blocks) - GameConfig.MIN_VISIBLE_BLOCKS:
 					block.queue_free()
 					placed_blocks.remove_at(i)
