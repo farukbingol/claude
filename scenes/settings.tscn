@@ -22,25 +22,36 @@ color = Color(0.1, 0.12, 0.15, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -250.0
-offset_right = 200.0
-offset_bottom = 250.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 30
 
-[node name="Title" type="Label" parent="VBoxContainer"]
+[node name="Header" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
-text = "SETTINGS"
-horizontal_alignment = 1
+theme_override_constants/separation = 20
+
+[node name="BackButton" type="Button" parent="VBoxContainer/Header"]
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "< "
+
+[node name="Title" type="Label" parent="VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 48
+text = "⚙️ AYARLAR"
 vertical_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
 
 [node name="Spacer" type="Control" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 30)
@@ -104,7 +115,7 @@ custom_minimum_size = Vector2(250, 70)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 28
-text = "BACK"
+text = "⬅️ ANA MENÜ"
 
 [node name="VersionLabel" type="Label" parent="."]
 layout_mode = 1
@@ -128,4 +139,5 @@ vertical_alignment = 1
 [connection signal="toggled" from="VBoxContainer/MusicContainer/MusicToggle" to="." method="_on_music_toggled"]
 [connection signal="toggled" from="VBoxContainer/SFXContainer/SFXToggle" to="." method="_on_sfx_toggled"]
 [connection signal="text_submitted" from="VBoxContainer/DevContainer/DevInput" to="." method="_on_dev_input_text_submitted"]
+[connection signal="pressed" from="VBoxContainer/Header/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/BackButton" to="." method="_on_back_pressed"]
