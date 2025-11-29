@@ -1,0 +1,117 @@
+[gd_scene load_steps=2 format=3 uid="uid://em8yp9xwqr7df"]
+
+[ext_resource type="Script" path="res://scenes/leaderboard_controller.gd" id="1_leaderboard"]
+
+[node name="Leaderboard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_leaderboard")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.1, 0.14, 1)
+
+[node name="GlassPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -800.0
+offset_right = 480.0
+offset_bottom = 800.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GlassPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 30.0
+offset_right = -30.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="HBoxContainer" parent="GlassPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="BackButton" type="Button" parent="GlassPanel/VBoxContainer/Header"]
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "< "
+
+[node name="Title" type="Label" parent="GlassPanel/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 48
+text = "🏆 LİDERLİK"
+vertical_alignment = 1
+
+[node name="TabButtons" type="HBoxContainer" parent="GlassPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GlobalButton" type="Button" parent="GlassPanel/VBoxContainer/TabButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+button_pressed = true
+text = "🌍 Global"
+
+[node name="CountryButton" type="Button" parent="GlassPanel/VBoxContainer/TabButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+text = "🏴 Ülke"
+
+[node name="WeeklyButton" type="Button" parent="GlassPanel/VBoxContainer/TabButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+toggle_mode = true
+text = "📅 Haftalık"
+
+[node name="Separator" type="HSeparator" parent="GlassPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="GlassPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeaderboardList" type="VBoxContainer" parent="GlassPanel/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="YourRankContainer" type="PanelContainer" parent="GlassPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="YourRankLabel" type="Label" parent="GlassPanel/VBoxContainer/YourRankContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Senin sıran: #42 - 1,234 puan"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="GlassPanel/VBoxContainer/Header/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="GlassPanel/VBoxContainer/TabButtons/GlobalButton" to="." method="_on_global_pressed"]
+[connection signal="pressed" from="GlassPanel/VBoxContainer/TabButtons/CountryButton" to="." method="_on_country_pressed"]
+[connection signal="pressed" from="GlassPanel/VBoxContainer/TabButtons/WeeklyButton" to="." method="_on_weekly_pressed"]

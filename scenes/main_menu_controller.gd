@@ -13,19 +13,35 @@ func _ready() -> void:
 	IAPManager.purchase_completed.connect(_on_purchase_completed)
 
 func _update_high_score() -> void:
-	high_score_label.text = "HIGH SCORE: " + ScoreManager.get_high_score_text()
+	high_score_label.text = "🏅 EN YÜKSEK: " + ScoreManager.get_high_score_text()
 
 func _update_no_ads_button() -> void:
 	if IAPManager.is_no_ads_purchased():
-		no_ads_button.text = "ADS REMOVED ✓"
+		no_ads_button.text = "✅ Reklamlar Kaldırıldı"
 		no_ads_button.disabled = true
 	else:
-		no_ads_button.text = "NO ADS"
+		no_ads_button.text = "🚫 Reklam Kaldır"
 		no_ads_button.disabled = false
 
 func _on_play_pressed() -> void:
 	AudioManager.play_button_click()
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
+
+func _on_modes_pressed() -> void:
+	AudioManager.play_button_click()
+	get_tree().change_scene_to_file("res://scenes/mode_select.tscn")
+
+func _on_shop_pressed() -> void:
+	AudioManager.play_button_click()
+	get_tree().change_scene_to_file("res://scenes/shop.tscn")
+
+func _on_achievements_pressed() -> void:
+	AudioManager.play_button_click()
+	get_tree().change_scene_to_file("res://scenes/achievements.tscn")
+
+func _on_leaderboard_pressed() -> void:
+	AudioManager.play_button_click()
+	get_tree().change_scene_to_file("res://scenes/leaderboard.tscn")
 
 func _on_settings_pressed() -> void:
 	AudioManager.play_button_click()

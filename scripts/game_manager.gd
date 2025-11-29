@@ -1,7 +1,7 @@
 extends Node
 
 ## GameManager - Central game state management
-## Handles game flow, difficulty, and block management
+## Handles game flow, difficulty, block management, and player data
 
 signal game_started
 signal game_over
@@ -9,6 +9,7 @@ signal block_placed(is_perfect: bool)
 signal speed_increased(new_speed: float)
 signal combo_achieved(combo_count: int)
 signal perfect_placement
+signal item_unlocked(item_id: String)
 
 # Game states
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
@@ -41,6 +42,20 @@ var perfect_count: int = 0
 # Continue available (from rewarded ad)
 var continue_available: bool = true
 
+# Player data
+var coins: int = 0
+var diamonds: int = 0
+var unlocked_items: Array = ["endless"]  # Default mode unlocked
+var selected_theme: String = "default"
+var selected_mode: String = "endless"
+
+# Available modes and themes
+const MODES = ["endless", "zen", "time_attack", "precision", "speed_run"]
+const THEMES = ["default", "neon_theme", "sakura_theme", "space_theme"]
+
+# Save path for player data
+const PLAYER_DATA_PATH: String = "user://player_data.save"
+
 func _ready() -> void:
 	# Initialize from GameConfig
 	base_block_speed = GameConfig.BASE_BLOCK_SPEED
@@ -49,6 +64,7 @@ func _ready() -> void:
 	base_block_height = GameConfig.BASE_BLOCK_HEIGHT
 	min_block_width = GameConfig.MIN_BLOCK_WIDTH
 	perfect_threshold = GameConfig.PERFECT_THRESHOLD
+	_load_player_data()
 	print("GameManager initialized")
 
 ## Start a new game
@@ -182,3 +198,85 @@ func get_game_stats() -> Dictionary:
 		"max_combo": max_combo,
 		"current_combo": current_combo
 	}
+
+## Unlock an item (mode or theme)
+func unlock_item(item_id: String) -> void:
+	if item_id not in unlocked_items:
+		unlocked_items.append(item_id)
+		_save_player_data()
+		item_unlocked.emit(item_id)
+		print("Item unlocked: ", item_id)
+
+## Check if an item is unlocked
+func is_item_unlocked(item_id: String) -> bool:
+	return item_id in unlocked_items
+
+## Get all unlocked items
+func get_unlocked_items() -> Array:
+	return unlocked_items.duplicate()
+
+## Add coins
+func add_coins(amount: int) -> void:
+	coins += amount
+	_save_player_data()
+
+## Add diamonds
+func add_diamonds(amount: int) -> void:
+	diamonds += amount
+	_save_player_data()
+
+## Spend coins (returns true if successful)
+func spend_coins(amount: int) -> bool:
+	if coins >= amount:
+		coins -= amount
+		_save_player_data()
+		return true
+	return false
+
+## Spend diamonds (returns true if successful)
+func spend_diamonds(amount: int) -> bool:
+	if diamonds >= amount:
+		diamonds -= amount
+		_save_player_data()
+		return true
+	return false
+
+## Set selected theme
+func set_theme(theme_id: String) -> void:
+	if theme_id in THEMES and is_item_unlocked(theme_id):
+		selected_theme = theme_id
+		_save_player_data()
+
+## Set selected mode
+func set_mode(mode_id: String) -> void:
+	if mode_id in MODES and is_item_unlocked(mode_id):
+		selected_mode = mode_id
+		_save_player_data()
+
+## Save player data
+func _save_player_data() -> void:
+	var save_file = FileAccess.open(PLAYER_DATA_PATH, FileAccess.WRITE)
+	if save_file:
+		var save_data = {
+			"coins": coins,
+			"diamonds": diamonds,
+			"unlocked_items": unlocked_items,
+			"selected_theme": selected_theme,
+			"selected_mode": selected_mode
+		}
+		save_file.store_var(save_data)
+		save_file.close()
+
+## Load player data
+func _load_player_data() -> void:
+	if FileAccess.file_exists(PLAYER_DATA_PATH):
+		var save_file = FileAccess.open(PLAYER_DATA_PATH, FileAccess.READ)
+		if save_file:
+			var save_data = save_file.get_var()
+			save_file.close()
+			if save_data is Dictionary:
+				coins = save_data.get("coins", 0)
+				diamonds = save_data.get("diamonds", 0)
+				unlocked_items = save_data.get("unlocked_items", ["endless"])
+				selected_theme = save_data.get("selected_theme", "default")
+				selected_mode = save_data.get("selected_mode", "endless")

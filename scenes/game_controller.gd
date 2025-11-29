@@ -62,6 +62,7 @@ func _ready() -> void:
 	
 	# Start the game
 	GameManager.start_game()
+	AchievementManager.start_session()
 	_spawn_first_block()
 	
 	# Update speed indicator
@@ -255,10 +256,17 @@ func _on_block_placed(overlap_amount: float) -> void:
 	placed_blocks.append(current_block)
 	
 	# Check for perfect placement
-	if overlap_amount < 5.0:
+	var is_perfect = overlap_amount < 5.0
+	if is_perfect:
 		GameManager.on_block_placed(0.0)
 	else:
 		GameManager.on_block_placed(overlap_amount)
+	
+	# Notify achievement manager
+	var block_count = len(placed_blocks)
+	var in_wind = block_count >= GameConfig.WIND_START_BLOCKS
+	var at_max_speed = GameManager.current_block_speed >= GameManager.max_block_speed * 0.95
+	AchievementManager.on_block_placed(is_perfect, GameManager.current_combo, in_wind, at_max_speed)
 	
 	# Move camera up
 	_scroll_view()
@@ -278,6 +286,7 @@ func _on_block_placed(overlap_amount: float) -> void:
 
 func _on_block_dropped() -> void:
 	# Block completely missed - GAME OVER
+	AchievementManager.on_game_end()
 	GameManager.end_game()
 
 func _scroll_view() -> void:
