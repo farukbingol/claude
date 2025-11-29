@@ -343,7 +343,7 @@ func _process(delta: float) -> void:
 	# Smooth camera follow - camera tracks block height 1:1
 	if camera_offset_y != target_camera_offset_y:
 		# Use a faster lerp for responsive camera tracking
-		camera_offset_y = lerp(camera_offset_y, target_camera_offset_y, 5.0 * delta)
+		camera_offset_y = lerp(camera_offset_y, target_camera_offset_y, GameConfig.CAMERA_LERP_SPEED * delta)
 		if abs(camera_offset_y - target_camera_offset_y) < 1.0:
 			camera_offset_y = target_camera_offset_y
 		blocks_container.position.y = camera_offset_y
