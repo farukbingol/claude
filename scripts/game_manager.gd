@@ -83,6 +83,9 @@ func end_game() -> void:
 func on_block_placed(overlap_amount: float) -> void:
 	block_count += 1
 	
+	# Calculate speed multiplier for scoring (1.0 to 2.0 based on current speed)
+	var speed_multiplier = 1.0 + (current_block_speed - base_block_speed) / (max_block_speed - base_block_speed)
+	
 	# Check if perfect placement
 	var is_perfect = abs(overlap_amount) <= perfect_threshold
 	
@@ -98,7 +101,8 @@ func on_block_placed(overlap_amount: float) -> void:
 		if current_combo >= GameConfig.COMBO_START_THRESHOLD:
 			multiplier = GameConfig.COMBO_BASE_MULTIPLIER + (current_combo - GameConfig.COMBO_START_THRESHOLD) * GameConfig.COMBO_INCREMENT
 		
-		var points = int(GameConfig.PERFECT_BONUS * multiplier)
+		# Apply speed multiplier to points
+		var points = int(GameConfig.PERFECT_BONUS * multiplier * speed_multiplier)
 		ScoreManager.add_score(points, true)
 		
 		perfect_placement.emit()
@@ -106,11 +110,13 @@ func on_block_placed(overlap_amount: float) -> void:
 		if current_combo >= GameConfig.COMBO_START_THRESHOLD:
 			combo_achieved.emit(current_combo)
 		
-		print("Perfect placement! Combo: ", current_combo, " Points: ", points)
+		print("Perfect placement! Combo: ", current_combo, " Speed mult: ", speed_multiplier, " Points: ", points)
 	else:
 		# Break combo on non-perfect placement
 		current_combo = 0
-		ScoreManager.add_score(GameConfig.NORMAL_SCORE, false)
+		# Apply speed multiplier to normal score
+		var points = int(GameConfig.NORMAL_SCORE * speed_multiplier)
+		ScoreManager.add_score(points, false)
 		
 		# Reduce block width based on overhang
 		current_block_width -= abs(overlap_amount)

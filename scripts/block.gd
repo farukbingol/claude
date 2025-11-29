@@ -102,11 +102,12 @@ func _handle_falling(delta: float) -> void:
 			position.y = target_y
 			has_checked_landing = true
 			_check_landing()
-			return
+			# Continue falling if _check_landing didn't place the block
+			if current_state == BlockState.FALLING:
+				return
 	
 	# Check if off screen (complete miss with no previous block or after landing check)
 	if position.y > GameConfig.BLOCK_FALL_OFF_Y:
-		block_dropped.emit()
 		queue_free()
 
 ## Check landing and handle placement or miss
@@ -114,10 +115,11 @@ func _check_landing() -> void:
 	var overlap = _calculate_overlap()
 	
 	if overlap <= 0:
-		# Complete miss - emit game over signal and fall off screen
+		# Complete miss - block falls off screen visually
 		AudioManager.play_block_drop()
 		block_dropped.emit()
-		queue_free()
+		# Continue falling with physics - don't queue_free yet
+		# The block will be freed in _handle_falling when it goes off screen
 		return
 	
 	# Block will be placed

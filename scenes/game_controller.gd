@@ -124,6 +124,9 @@ func _update_speed_indicator() -> void:
 	if speed_indicator:
 		var speed_percent = int((GameManager.current_block_speed / GameManager.max_block_speed) * 100)
 		speed_indicator.text = "SPEED: " + str(speed_percent) + "%"
+		# Change color based on speed (from gray to red at max speed)
+		var color_factor = clamp((GameManager.current_block_speed - GameManager.base_block_speed) / (GameManager.max_block_speed - GameManager.base_block_speed), 0.0, 1.0)
+		speed_indicator.modulate = Color(1.0, 1.0 - color_factor * 0.6, 1.0 - color_factor * 0.7)
 
 func _spawn_first_block() -> void:
 	# Create base platform as a Block (so it can be used as previous_block reference)
