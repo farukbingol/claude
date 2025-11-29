@@ -25,7 +25,7 @@ var screen_height: float = 1920.0
 # Block settings
 var block_spawn_y: float = 400.0
 var base_block_y: float = 1700.0
-var block_height: float = 50.0
+var block_height: float = GameConfig.BASE_BLOCK_HEIGHT
 
 # Current block reference
 var current_block: Node2D = null
@@ -340,9 +340,10 @@ func _process(delta: float) -> void:
 		if shake_intensity <= 0:
 			shake_intensity = BossManager.get_earthquake_shake_intensity() * 0.3
 	
-	# Smooth camera follow
+	# Smooth camera follow - camera tracks block height 1:1
 	if camera_offset_y != target_camera_offset_y:
-		camera_offset_y = lerp(camera_offset_y, target_camera_offset_y, delta / GameConfig.CAMERA_SCROLL_SPEED)
+		# Use a faster lerp for responsive camera tracking
+		camera_offset_y = lerp(camera_offset_y, target_camera_offset_y, 5.0 * delta)
 		if abs(camera_offset_y - target_camera_offset_y) < 1.0:
 			camera_offset_y = target_camera_offset_y
 		blocks_container.position.y = camera_offset_y
@@ -624,7 +625,7 @@ func _on_boss_started(boss_type: String, level: int) -> void:
 func _on_boss_defeated(boss_type: String, reward: int) -> void:
 	if boss_label:
 		# Show victory message
-		boss_label.text = "💎 +" + str(reward) + " KAZANILDI!"
+		boss_label.text = "BOSS DEFEATED! +" + str(reward) + " 💎"
 		boss_label.add_theme_color_override("font_color", Color.GOLD)
 		
 		# Animate and hide
