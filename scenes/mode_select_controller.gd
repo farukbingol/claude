@@ -63,17 +63,18 @@ func _create_mode_button(mode_id: String, mode: Dictionary) -> Control:
 	var is_unlocked = GameManager.is_item_unlocked(mode_id)
 	var is_selected = GameManager.selected_mode == mode_id
 	
-	# Create content with HBox
+	# Create content with HBox - ensure it fills the button
 	var hbox = HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 20)
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.add_theme_constant_override("separation", 15)
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(hbox)
 	
-	# Icon
+	# Icon - reduced width to give more space to text
 	var icon_label = Label.new()
-	icon_label.custom_minimum_size = Vector2(80, 0)
+	icon_label.custom_minimum_size = Vector2(60, 0)
 	icon_label.text = mode.icon
-	icon_label.add_theme_font_size_override("font_size", 48)
+	icon_label.add_theme_font_size_override("font_size", 42)
 	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -104,12 +105,12 @@ func _create_mode_button(mode_id: String, mode: Dictionary) -> Control:
 	desc_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(desc_label)
 	
-	# Status indicator
+	# Status indicator - reduced width to give more space to text
 	var status_label = Label.new()
-	status_label.custom_minimum_size = Vector2(100, 0)
+	status_label.custom_minimum_size = Vector2(60, 0)
 	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	status_label.add_theme_font_size_override("font_size", 28)
+	status_label.add_theme_font_size_override("font_size", 24)
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	if is_selected:

@@ -413,8 +413,17 @@ func _scroll_view() -> void:
 	
 	# Start scrolling after CAMERA_SCROLL_START_BLOCK blocks
 	if block_count > GameConfig.CAMERA_SCROLL_START_BLOCK:
-		var blocks_above_threshold = block_count - GameConfig.CAMERA_SCROLL_START_BLOCK
-		target_camera_offset_y = blocks_above_threshold * block_height
+		# Camera follows block height 1:1
+		target_camera_offset_y = (block_count - GameConfig.CAMERA_SCROLL_START_BLOCK) * block_height
+		
+		# Ensure the top block is always visible on screen
+		if len(placed_blocks) > 0:
+			var top_block = placed_blocks[-1]
+			if is_instance_valid(top_block):
+				var block_screen_y = top_block.position.y - target_camera_offset_y
+				# If block is above top 1/4 of screen, pull camera higher
+				if block_screen_y < screen_height * 0.25:
+					target_camera_offset_y = top_block.position.y - screen_height * 0.4
 	
 	# Also update block positions if tower is very tall (cleanup old blocks)
 	if block_count > GameConfig.BLOCK_CLEANUP_THRESHOLD:
