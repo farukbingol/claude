@@ -42,16 +42,29 @@ const BLOCK_COLORS: Array = [
 ]
 
 # Background gradient colors (sky changes as tower grows)
+# Zone 1 (0-30 blocks): City silhouette (orange/purple)
+# Zone 2 (30-60 blocks): Clouds (blue/white)
+# Zone 3 (60-100 blocks): High atmosphere (dark blue)
+# Zone 4 (100+ blocks): Space (black + stars)
 const BG_COLORS: Array = [
-	Color("#1a1a2e"),  # Night - bottom
-	Color("#16213e"),  # Deep blue
-	Color("#0f3460"),  # Blue
-	Color("#1a508b"),  # Light blue
-	Color("#c06c84"),  # Sunset pink
-	Color("#f67280"),  # Coral
-	Color("#f8b500"),  # Orange
-	Color("#ffcb74"),  # Light orange - top
+	Color("#2d1b4e"),  # Purple (city bottom)
+	Color("#4a2c7d"),  # Purple mid
+	Color("#ff6b35"),  # Orange sunset
+	Color("#f7931a"),  # Orange
+	Color("#87ceeb"),  # Sky blue (clouds start)
+	Color("#b0d4ed"),  # Light blue
+	Color("#e8f4f8"),  # Almost white (cloud tops)
+	Color("#4a90bd"),  # Medium blue (high atmosphere)
+	Color("#1e3a5f"),  # Dark blue
+	Color("#0a1628"),  # Very dark blue (space approach)
+	Color("#050a12"),  # Almost black
+	Color("#000008"),  # Space black
 ]
+
+# Background zone thresholds (block counts)
+const BG_ZONE_CITY: int = 30
+const BG_ZONE_CLOUDS: int = 60
+const BG_ZONE_ATMOSPHERE: int = 100
 
 # Animation durations
 const PERFECT_TEXT_DURATION: float = 1.0
