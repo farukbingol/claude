@@ -71,9 +71,8 @@ func is_item_purchased(item_id: String) -> bool:
 ## Purchase No Ads with diamonds
 func purchase_no_ads_with_diamonds() -> bool:
 	if purchase_item("no_ads_diamond", GameConfig.NO_ADS_DIAMOND_COST):
-		# Also update IAPManager to reflect no ads state
-		IAPManager.no_ads_purchased = true
-		IAPManager._save_purchase_state()
+		# Use the proper API to set no ads state
+		IAPManager.set_no_ads_purchased(true)
 		return true
 	return false
 
@@ -87,9 +86,8 @@ func activate_dev_mode() -> void:
 	all_skins_unlocked = true
 	diamonds = GameConfig.DEVOPS_DIAMONDS
 	
-	# Also set no ads
-	IAPManager.no_ads_purchased = true
-	IAPManager._save_purchase_state()
+	# Use the proper API to set no ads state
+	IAPManager.set_no_ads_purchased(true)
 	
 	diamonds_changed.emit(diamonds)
 	_save_data()

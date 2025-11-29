@@ -93,6 +93,14 @@ func restore_purchases() -> void:
 func is_no_ads_purchased() -> bool:
 	return no_ads_purchased
 
+## Set No Ads purchased state (used by DiamondManager for diamond purchases)
+func set_no_ads_purchased(purchased: bool) -> void:
+	no_ads_purchased = purchased
+	_save_purchase_state()
+	if purchased:
+		AdManager.disable_ads()
+		purchase_completed.emit(PRODUCT_NO_ADS)
+
 ## Save purchase state to local storage
 func _save_purchase_state() -> void:
 	var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)

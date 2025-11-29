@@ -416,14 +416,14 @@ func _scroll_view() -> void:
 		target_camera_offset_y = blocks_above_threshold * block_height
 	
 	# Also update block positions if tower is very tall (cleanup old blocks)
-	if block_count > 50:
+	if block_count > GameConfig.BLOCK_CLEANUP_THRESHOLD:
 		# Remove blocks that are far below the visible area
 		var visible_bottom = base_block_y + camera_offset_y + screen_height
 		for i in range(len(placed_blocks) - 1, -1, -1):
 			var block = placed_blocks[i]
 			if is_instance_valid(block) and block.position.y > visible_bottom + 500:
-				# Keep at least 20 blocks visible
-				if i < len(placed_blocks) - 20:
+				# Keep at least MIN_VISIBLE_BLOCKS blocks visible
+				if i < len(placed_blocks) - GameConfig.MIN_VISIBLE_BLOCKS:
 					block.queue_free()
 					placed_blocks.remove_at(i)
 

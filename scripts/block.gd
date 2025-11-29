@@ -312,12 +312,12 @@ func _handle_ice_slide(delta: float) -> void:
 		return
 	
 	# Slide the block slightly after placement
-	var slide_speed = ice_slide_amount * 3.0  # Complete slide quickly
+	var slide_speed = ice_slide_amount * GameConfig.ICE_SLIDE_SPEED_MULTIPLIER
 	var slide_this_frame = slide_speed * delta
 	
 	if ice_slide_amount > 0:
 		# Alternate slide direction based on position
-		var slide_dir = 1 if fmod(position.x, 100) > 50 else -1
+		var slide_dir = 1 if fmod(position.x, GameConfig.ICE_SLIDE_DIRECTION_THRESHOLD) > 50 else -1
 		position.x += slide_dir * slide_this_frame
 		ice_slide_amount -= slide_this_frame
 		

@@ -100,6 +100,8 @@ const BOSS_REWARDS: Dictionary = {
 # Boss effect settings
 const ICE_SLIDE_AMOUNT: float = 30.0  # Pixels the block slides after placement
 const ICE_SLIDE_DURATION: float = 0.3
+const ICE_SLIDE_SPEED_MULTIPLIER: float = 3.0  # How fast the slide completes
+const ICE_SLIDE_DIRECTION_THRESHOLD: float = 100.0  # Threshold for alternating direction
 const EARTHQUAKE_SHAKE_INTENSITY: float = 15.0
 const EARTHQUAKE_TOWER_SWAY: float = 5.0
 const GHOST_BLINK_INTERVAL: float = 0.3  # Seconds between visibility toggles
@@ -115,6 +117,8 @@ const NO_ADS_DIAMOND_COST: int = 500  # Cost to remove ads with diamonds
 # ============= CAMERA SETTINGS =============
 const CAMERA_SCROLL_START_BLOCK: int = 6  # Start scrolling after this many blocks
 const CAMERA_SCROLL_SPEED: float = 0.3  # Smooth scroll duration
+const MIN_VISIBLE_BLOCKS: int = 20  # Minimum blocks to keep visible when cleaning up
+const BLOCK_CLEANUP_THRESHOLD: int = 50  # Start cleaning up blocks after this many
 
 # ============= DEVOPS SETTINGS =============
 const DEVOPS_CODE: String = "DEVOPS2024"
