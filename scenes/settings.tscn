@@ -78,6 +78,27 @@ button_pressed = true
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 
+[node name="DevContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DevInput" type="LineEdit" parent="VBoxContainer/DevContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(200, 40)
+theme_override_colors/font_color = Color(0.3, 0.3, 0.3, 1)
+theme_override_colors/font_placeholder_color = Color(0.2, 0.2, 0.2, 0.5)
+theme_override_font_sizes/font_size = 14
+placeholder_text = "Enter code..."
+alignment = 1
+secret = true
+
+[node name="DevStatus" type="Label" parent="VBoxContainer/DevContainer"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
 [node name="BackButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(250, 70)
 layout_mode = 2
@@ -106,4 +127,5 @@ vertical_alignment = 1
 
 [connection signal="toggled" from="VBoxContainer/MusicContainer/MusicToggle" to="." method="_on_music_toggled"]
 [connection signal="toggled" from="VBoxContainer/SFXContainer/SFXToggle" to="." method="_on_sfx_toggled"]
+[connection signal="text_submitted" from="VBoxContainer/DevContainer/DevInput" to="." method="_on_dev_input_text_submitted"]
 [connection signal="pressed" from="VBoxContainer/BackButton" to="." method="_on_back_pressed"]
