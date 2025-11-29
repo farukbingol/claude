@@ -54,7 +54,7 @@ const ACHIEVEMENTS = {
 		"condition": "perfect_streak",
 		"target": 5,
 		"reward_type": "unlock",
-		"reward_value": "precision_mode"
+		"reward_value": "precision"
 	},
 	"fireball": {
 		"name": "Ateş Topu",

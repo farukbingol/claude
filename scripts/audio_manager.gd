@@ -67,7 +67,7 @@ func _load_sounds() -> void:
 	var sound_files = {
 		SFX_BLOCK_PLACE: "res://assets/sounds/drop_002.ogg",
 		SFX_PERFECT: "res://assets/sounds/confirmation_001.ogg",
-		SFX_GAME_OVER: "res://assets/sounds/error_001.ogg",
+		SFX_GAME_OVER: "res://assets/sounds/glitch_004.ogg",
 		SFX_BUTTON_CLICK: "res://assets/sounds/click_001.ogg",
 		SFX_BLOCK_DROP: "res://assets/sounds/error_001.ogg",
 		SFX_COMBO: "res://assets/sounds/maximize_001.ogg"

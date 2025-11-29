@@ -127,8 +127,8 @@ func _format_score(score: int) -> String:
 func _update_your_rank() -> void:
 	var your_score = ScoreManager.high_score
 	
-	# Simulate finding your rank
-	var your_rank = 42  # Mock rank
+	# Calculate rank based on score thresholds
+	var your_rank: int
 	if your_score > 15000:
 		your_rank = 1
 	elif your_score > 10000:
@@ -137,10 +137,15 @@ func _update_your_rank() -> void:
 		your_rank = randi_range(11, 50)
 	elif your_score > 1000:
 		your_rank = randi_range(51, 200)
-	else:
+	elif your_score > 0:
 		your_rank = randi_range(201, 1000)
+	else:
+		your_rank = 0  # No rank yet
 	
-	your_rank_label.text = "Senin sıran: #" + str(your_rank) + " - " + _format_score(your_score) + " puan"
+	if your_rank > 0:
+		your_rank_label.text = "Senin sıran: #" + str(your_rank) + " - " + _format_score(your_score) + " puan"
+	else:
+		your_rank_label.text = "Henüz sıralama yok - Oyna ve liderlik tablosuna gir!"
 
 func _update_tab_buttons() -> void:
 	global_button.button_pressed = current_tab == "global"
