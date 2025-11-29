@@ -63,15 +63,14 @@ func _setup_audio_players() -> void:
 
 ## Load sound files
 func _load_sounds() -> void:
-	# Try to load sounds from assets folder
-	# These are placeholders - actual sounds would be .wav or .ogg files
+	# Map sounds to Kenney audio files from assets/sounds
 	var sound_files = {
-		SFX_BLOCK_PLACE: "res://assets/sounds/block_place.wav",
-		SFX_PERFECT: "res://assets/sounds/perfect.wav",
-		SFX_GAME_OVER: "res://assets/sounds/game_over.wav",
-		SFX_BUTTON_CLICK: "res://assets/sounds/button_click.wav",
-		SFX_BLOCK_DROP: "res://assets/sounds/block_drop.wav",
-		SFX_COMBO: "res://assets/sounds/combo.wav"
+		SFX_BLOCK_PLACE: "res://assets/sounds/drop_002.ogg",
+		SFX_PERFECT: "res://assets/sounds/confirmation_001.ogg",
+		SFX_GAME_OVER: "res://assets/sounds/glitch_004.ogg",
+		SFX_BUTTON_CLICK: "res://assets/sounds/click_001.ogg",
+		SFX_BLOCK_DROP: "res://assets/sounds/error_001.ogg",
+		SFX_COMBO: "res://assets/sounds/maximize_001.ogg"
 	}
 	
 	for sound_name in sound_files:
@@ -79,7 +78,7 @@ func _load_sounds() -> void:
 		if ResourceLoader.exists(path):
 			sounds[sound_name] = load(path)
 		else:
-			# Create a placeholder beep sound
+			# Sound file not found
 			sounds[sound_name] = null
 			print("Sound file not found: ", path)
 

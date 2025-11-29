@@ -16,6 +16,7 @@ const Block = preload("res://scripts/block.gd")
 @onready var pause_button: Button = $UI/PauseButton
 @onready var pause_menu: Control = $UI/PauseMenu
 @onready var speed_indicator: Label = $UI/SpeedIndicator
+@onready var wind_indicator: Label = $UI/WindIndicator
 
 # Game settings
 var screen_width: float = 1080.0
@@ -61,6 +62,7 @@ func _ready() -> void:
 	
 	# Start the game
 	GameManager.start_game()
+	AchievementManager.start_session()
 	_spawn_first_block()
 	
 	# Update speed indicator
@@ -89,7 +91,7 @@ func _setup_gradient_background() -> void:
 		GameConfig.BG_COLORS[1],
 		GameConfig.BG_COLORS[2],
 		GameConfig.BG_COLORS[3],
-		GameConfig.BG_COLORS[4]
+		GameConfig.BG_COLORS[min(4, len(GameConfig.BG_COLORS) - 1)]
 	]
 	
 	gradient_texture = GradientTexture2D.new()
@@ -106,6 +108,7 @@ func _setup_gradient_background() -> void:
 	texture_rect.size = Vector2(screen_width, screen_height)
 	texture_rect.position = Vector2.ZERO
 	texture_rect.z_index = -1
+	texture_rect.name = "GradientBackground"
 	add_child(texture_rect)
 	
 	# Hide the original background
@@ -124,6 +127,21 @@ func _update_speed_indicator() -> void:
 	if speed_indicator:
 		var speed_percent = int((GameManager.current_block_speed / GameManager.max_block_speed) * 100)
 		speed_indicator.text = "SPEED: " + str(speed_percent) + "%"
+		# Change color based on speed (from gray to red at max speed)
+		var color_factor = clamp((GameManager.current_block_speed - GameManager.base_block_speed) / (GameManager.max_block_speed - GameManager.base_block_speed), 0.0, 1.0)
+		speed_indicator.modulate = Color(1.0, 1.0 - color_factor * 0.6, 1.0 - color_factor * 0.7)
+
+func _update_wind_indicator() -> void:
+	if wind_indicator:
+		var block_count = len(placed_blocks)
+		if block_count >= GameConfig.WIND_START_BLOCKS:
+			wind_indicator.visible = true
+			var wind_progress = min(float(block_count - GameConfig.WIND_START_BLOCKS) / GameConfig.WIND_RAMP_BLOCKS, 1.0)
+			var wave_count = 1 + int(wind_progress * 4)  # 1-5 waves
+			var waves = "~".repeat(wave_count)
+			wind_indicator.text = "WIND: " + waves
+		else:
+			wind_indicator.visible = false
 
 func _spawn_first_block() -> void:
 	# Create base platform as a Block (so it can be used as previous_block reference)
@@ -180,6 +198,13 @@ func _spawn_block() -> void:
 		start_from_left
 	)
 	
+	# Apply wind if we're above the wind threshold
+	var block_count = len(placed_blocks)
+	if block_count >= GameConfig.WIND_START_BLOCKS:
+		var wind_progress = min(float(block_count - GameConfig.WIND_START_BLOCKS) / GameConfig.WIND_RAMP_BLOCKS, 1.0)
+		var wind_strength = GameConfig.WIND_BASE_STRENGTH + wind_progress * (GameConfig.WIND_MAX_STRENGTH - GameConfig.WIND_BASE_STRENGTH)
+		block_scene.set_wind_strength(wind_strength)
+	
 	# Set reference to previous block
 	if len(placed_blocks) > 0:
 		block_scene.set_previous_block(placed_blocks[-1])
@@ -231,16 +256,26 @@ func _on_block_placed(overlap_amount: float) -> void:
 	placed_blocks.append(current_block)
 	
 	# Check for perfect placement
-	if overlap_amount < 5.0:
+	var is_perfect = overlap_amount < 5.0
+	if is_perfect:
 		GameManager.on_block_placed(0.0)
 	else:
 		GameManager.on_block_placed(overlap_amount)
+	
+	# Notify achievement manager
+	var block_count = len(placed_blocks)
+	var in_wind = block_count >= GameConfig.WIND_START_BLOCKS
+	var at_max_speed = GameManager.current_block_speed >= GameManager.max_block_speed * 0.95
+	AchievementManager.on_block_placed(is_perfect, GameManager.current_combo, in_wind, at_max_speed)
 	
 	# Move camera up
 	_scroll_view()
 	
 	# Update background gradient based on height
 	_update_background_gradient()
+	
+	# Update wind indicator
+	_update_wind_indicator()
 	
 	# Spawn next block
 	if GameManager.is_playing():
@@ -251,6 +286,7 @@ func _on_block_placed(overlap_amount: float) -> void:
 
 func _on_block_dropped() -> void:
 	# Block completely missed - GAME OVER
+	AchievementManager.on_game_end()
 	GameManager.end_game()
 
 func _scroll_view() -> void:
@@ -267,25 +303,52 @@ func _scroll_view() -> void:
 				child.position.y += scroll_amount
 
 func _update_background_gradient() -> void:
-	# Update gradient colors based on tower height
-	var height_factor = min(len(placed_blocks) / GameConfig.BG_GRADIENT_BLOCKS_FOR_FULL_CHANGE, 1.0)  # Full gradient change at configured blocks
+	# Update gradient colors based on tower height and atmospheric zones
+	var block_count = len(placed_blocks)
+	var max_colors = len(GameConfig.BG_COLORS)
+	
+	# Calculate which zone we're in based on block count
+	var zone_progress: float = 0.0
+	var base_index: int = 0
+	
+	if block_count < GameConfig.BG_ZONE_CITY:
+		# Zone 1: City (0-30 blocks) - colors 0-3
+		zone_progress = float(block_count) / GameConfig.BG_ZONE_CITY
+		base_index = int(zone_progress * 2)  # Transition through first 3 colors
+	elif block_count < GameConfig.BG_ZONE_CLOUDS:
+		# Zone 2: Clouds (30-60 blocks) - colors 4-6
+		zone_progress = float(block_count - GameConfig.BG_ZONE_CITY) / (GameConfig.BG_ZONE_CLOUDS - GameConfig.BG_ZONE_CITY)
+		base_index = 3 + int(zone_progress * 2)
+	elif block_count < GameConfig.BG_ZONE_ATMOSPHERE:
+		# Zone 3: High Atmosphere (60-100 blocks) - colors 7-9
+		zone_progress = float(block_count - GameConfig.BG_ZONE_CLOUDS) / (GameConfig.BG_ZONE_ATMOSPHERE - GameConfig.BG_ZONE_CLOUDS)
+		base_index = 6 + int(zone_progress * 2)
+	else:
+		# Zone 4: Space (100+ blocks) - colors 9-11
+		zone_progress = min(float(block_count - GameConfig.BG_ZONE_ATMOSPHERE) / 50.0, 1.0)
+		base_index = 9 + int(zone_progress * 2)
+	
+	# Clamp base_index to valid range
+	base_index = clampi(base_index, 0, max_colors - 5)
 	
 	if gradient_texture and gradient_texture.gradient:
 		var gradient = gradient_texture.gradient
-		var base_index = int(height_factor * (len(GameConfig.BG_COLORS) - GameConfig.BG_GRADIENT_TRANSITION_RANGE - 1))  # Shift through color palette
-		
-		if base_index < len(GameConfig.BG_COLORS) - GameConfig.BG_GRADIENT_TRANSITION_RANGE:
-			gradient.colors[0] = GameConfig.BG_COLORS[base_index]
-			gradient.colors[1] = GameConfig.BG_COLORS[base_index + 1]
-			gradient.colors[2] = GameConfig.BG_COLORS[base_index + 2]
-			gradient.colors[3] = GameConfig.BG_COLORS[base_index + 3]
-			if base_index + GameConfig.BG_GRADIENT_TRANSITION_RANGE < len(GameConfig.BG_COLORS):
-				gradient.colors[4] = GameConfig.BG_COLORS[base_index + GameConfig.BG_GRADIENT_TRANSITION_RANGE]
+		gradient.colors[0] = GameConfig.BG_COLORS[base_index]
+		gradient.colors[1] = GameConfig.BG_COLORS[min(base_index + 1, max_colors - 1)]
+		gradient.colors[2] = GameConfig.BG_COLORS[min(base_index + 2, max_colors - 1)]
+		gradient.colors[3] = GameConfig.BG_COLORS[min(base_index + 3, max_colors - 1)]
+		gradient.colors[4] = GameConfig.BG_COLORS[min(base_index + 4, max_colors - 1)]
 
 func _on_perfect_placement() -> void:
 	_show_perfect_text()
 	# Add glow effect
 	_add_glow_effect()
+	# Add small screen shake for perfect
+	_trigger_screen_shake_light()
+	# Add haptic feedback
+	_trigger_haptic()
+	# Spawn particles
+	_spawn_perfect_particles()
 
 func _show_perfect_text() -> void:
 	perfect_label.visible = true
@@ -302,6 +365,8 @@ func _on_combo_achieved(combo_count: int) -> void:
 	_show_combo_text(combo_count)
 	_trigger_screen_shake()
 	AudioManager.play_combo()
+	_trigger_haptic()
+	_spawn_combo_particles(combo_count)
 
 func _show_combo_text(combo_count: int) -> void:
 	if combo_label:
@@ -364,3 +429,50 @@ func _on_pause_quit_pressed() -> void:
 	if pause_menu:
 		pause_menu.visible = false
 	GameManager.go_to_menu()
+
+func _trigger_screen_shake_light() -> void:
+	shake_intensity = GameConfig.SCREEN_SHAKE_INTENSITY * 0.3
+
+func _trigger_haptic() -> void:
+	# Trigger haptic feedback on mobile devices
+	if OS.has_feature("mobile"):
+		Input.vibrate_handheld(50)  # 50ms vibration
+
+func _spawn_perfect_particles() -> void:
+	# Create confetti-like particles for perfect placement
+	if len(placed_blocks) > 0:
+		var last_block = placed_blocks[-1]
+		if is_instance_valid(last_block):
+			_create_particles_at(last_block.position, Color.GOLD)
+
+func _spawn_combo_particles(combo_count: int) -> void:
+	# Create more particles for higher combos
+	if len(placed_blocks) > 0:
+		var last_block = placed_blocks[-1]
+		if is_instance_valid(last_block):
+			var colors = [Color.ORANGE, Color.RED, Color.MAGENTA]
+			var color_index = min(combo_count - 2, len(colors) - 1)
+			_create_particles_at(last_block.position, colors[color_index])
+
+func _create_particles_at(pos: Vector2, color: Color) -> void:
+	var particles = CPUParticles2D.new()
+	particles.position = pos
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 0.9
+	particles.amount = 20
+	particles.lifetime = 0.8
+	particles.direction = Vector2(0, -1)
+	particles.spread = 180.0
+	particles.gravity = Vector2(0, 400)
+	particles.initial_velocity_min = 200.0
+	particles.initial_velocity_max = 400.0
+	particles.scale_amount_min = 3.0
+	particles.scale_amount_max = 6.0
+	particles.color = color
+	add_child(particles)
+	
+	# Auto-free after particles finish
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(particles):
+		particles.queue_free()
