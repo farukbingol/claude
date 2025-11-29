@@ -39,6 +39,16 @@ var has_checked_landing: bool = false  # Flag to check landing once
 # Visual components
 var color_rect: ColorRect
 
+# Ice effect
+var ice_effect_enabled: bool = false
+var ice_slide_amount: float = 0.0
+
+# Ghost effect
+var ghost_effect_enabled: bool = false
+var ghost_blink_interval: float = 0.3
+var ghost_blink_timer: float = 0.0
+var ghost_visible: bool = true
+
 func _ready() -> void:
 	# Initialize gravity from config
 	gravity = GameConfig.BLOCK_GRAVITY
@@ -77,10 +87,11 @@ func _process(delta: float) -> void:
 	match current_state:
 		BlockState.MOVING:
 			_handle_movement(delta)
+			_handle_ghost_effect(delta)
 		BlockState.FALLING:
 			_handle_falling(delta)
 		BlockState.PLACED:
-			pass  # Do nothing when placed
+			_handle_ice_slide(delta)
 
 ## Handle horizontal movement
 func _handle_movement(delta: float) -> void:
@@ -289,3 +300,52 @@ func set_screen_width(width: float) -> void:
 func place_immediately() -> void:
 	current_state = BlockState.PLACED
 	velocity = Vector2.ZERO
+
+## Set ice effect for this block
+func set_ice_effect(enabled: bool, slide_amount: float) -> void:
+	ice_effect_enabled = enabled
+	ice_slide_amount = slide_amount
+
+## Handle ice sliding after placement
+func _handle_ice_slide(delta: float) -> void:
+	if not ice_effect_enabled or ice_slide_amount <= 0:
+		return
+	
+	# Slide the block slightly after placement
+	var slide_speed = ice_slide_amount * 3.0  # Complete slide quickly
+	var slide_this_frame = slide_speed * delta
+	
+	if ice_slide_amount > 0:
+		# Alternate slide direction based on position
+		var slide_dir = 1 if fmod(position.x, 100) > 50 else -1
+		position.x += slide_dir * slide_this_frame
+		ice_slide_amount -= slide_this_frame
+		
+		# Clamp to screen bounds
+		var half_width = block_width / 2
+		position.x = clamp(position.x, half_width, screen_width - half_width)
+		
+		if ice_slide_amount <= 0:
+			ice_slide_amount = 0
+			ice_effect_enabled = false
+
+## Set ghost effect for this block
+func set_ghost_effect(enabled: bool, blink_interval: float) -> void:
+	ghost_effect_enabled = enabled
+	ghost_blink_interval = blink_interval
+	ghost_blink_timer = 0.0
+	ghost_visible = true
+
+## Handle ghost blinking effect
+func _handle_ghost_effect(delta: float) -> void:
+	if not ghost_effect_enabled:
+		return
+	
+	ghost_blink_timer += delta
+	if ghost_blink_timer >= ghost_blink_interval:
+		ghost_blink_timer = 0.0
+		ghost_visible = not ghost_visible
+		
+		# Update visibility
+		if color_rect:
+			color_rect.modulate.a = 1.0 if ghost_visible else 0.2

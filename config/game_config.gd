@@ -85,6 +85,41 @@ const FALLING_PIECE_ROTATION: float = 0.05  # Rotation factor for falling pieces
 const BG_GRADIENT_BLOCKS_FOR_FULL_CHANGE: float = 50.0  # Full gradient change at this many blocks
 const BG_GRADIENT_TRANSITION_RANGE: int = 4  # Number of colors in gradient transition
 
+# ============= BOSS SETTINGS =============
+# Boss levels and rewards
+const BOSS_LEVELS: Array = [20, 40, 60, 80, 100]
+const BOSS_TYPES: Array = ["ice", "wind", "earthquake", "ghost", "chaos"]
+const BOSS_REWARDS: Dictionary = {
+	"ice": 5,        # Level 20 - Easy
+	"wind": 10,      # Level 40 - Medium
+	"earthquake": 15, # Level 60 - Hard
+	"ghost": 25,     # Level 80 - Very Hard
+	"chaos": 50      # Level 100 - Impossible
+}
+
+# Boss effect settings
+const ICE_SLIDE_AMOUNT: float = 30.0  # Pixels the block slides after placement
+const ICE_SLIDE_DURATION: float = 0.3
+const EARTHQUAKE_SHAKE_INTENSITY: float = 15.0
+const EARTHQUAKE_TOWER_SWAY: float = 5.0
+const GHOST_BLINK_INTERVAL: float = 0.3  # Seconds between visibility toggles
+const GHOST_VISIBLE_CHANCE: float = 0.7  # 70% visible, 30% invisible
+const CHAOS_SPEED_MIN: float = 0.5  # 50% of normal speed
+const CHAOS_SPEED_MAX: float = 1.5  # 150% of normal speed
+const CHAOS_SIZE_MIN: float = 0.7  # 70% of normal size
+const CHAOS_SIZE_MAX: float = 1.3  # 130% of normal size
+
+# ============= DIAMOND SETTINGS =============
+const NO_ADS_DIAMOND_COST: int = 500  # Cost to remove ads with diamonds
+
+# ============= CAMERA SETTINGS =============
+const CAMERA_SCROLL_START_BLOCK: int = 6  # Start scrolling after this many blocks
+const CAMERA_SCROLL_SPEED: float = 0.3  # Smooth scroll duration
+
+# ============= DEVOPS SETTINGS =============
+const DEVOPS_CODE: String = "DEVOPS2024"
+const DEVOPS_DIAMONDS: int = 99999
+
 # ============= AD SETTINGS =============
 const INTERSTITIAL_MIN_GAMES: int = 3
 const INTERSTITIAL_MAX_GAMES: int = 5

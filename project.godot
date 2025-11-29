@@ -28,6 +28,8 @@ AudioManager="*res://scripts/audio_manager.gd"
 AdsConfig="*res://config/ads_config.gd"
 StatsManager="*res://scripts/stats_manager.gd"
 AchievementManager="*res://scripts/achievement_manager.gd"
+DiamondManager="*res://scripts/diamond_manager.gd"
+BossManager="*res://scripts/boss_manager.gd"
 
 [display]
 
