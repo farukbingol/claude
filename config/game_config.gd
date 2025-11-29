@@ -4,15 +4,16 @@ extends Node
 ## Easy to modify all game parameters in one place
 
 # ============= BLOCK SETTINGS =============
-const BASE_BLOCK_WIDTH: float = 200.0
-const BASE_BLOCK_HEIGHT: float = 50.0
-const MIN_BLOCK_WIDTH: float = 20.0
+const BASE_BLOCK_WIDTH: float = 400.0
+const BASE_BLOCK_HEIGHT: float = 80.0
+const MIN_BLOCK_WIDTH: float = 40.0
+const SHRINK_PENALTY_MULTIPLIER: float = 0.5  # Reduce shrink amount (more forgiving)
 
 # ============= SPEED SETTINGS =============
-const BASE_BLOCK_SPEED: float = 300.0
+const BASE_BLOCK_SPEED: float = 450.0
 const MAX_BLOCK_SPEED: float = 800.0
 const SPEED_INCREASE_INTERVAL: int = 5  # Increase speed every N blocks
-const SPEED_INCREASE_PERCENT: float = 0.10  # 10% speed increase
+const SPEED_INCREASE_PERCENT: float = 0.05  # 5% speed increase (more gradual)
 
 # ============= SCORING SETTINGS =============
 const NORMAL_SCORE: int = 10
@@ -90,8 +91,8 @@ const INTERSTITIAL_MAX_GAMES: int = 5
 const GAMES_BETWEEN_INTERSTITIALS: int = 3  # Show interstitial every N games
 
 # ============= UI SETTINGS =============
-const SCREEN_WIDTH: float = 1080.0
-const SCREEN_HEIGHT: float = 1920.0
+const SCREEN_WIDTH: float = 720.0
+const SCREEN_HEIGHT: float = 1280.0
 const BANNER_HEIGHT: float = 100.0
 
 func _ready() -> void:

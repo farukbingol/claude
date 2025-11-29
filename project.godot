@@ -31,9 +31,9 @@ AchievementManager="*res://scripts/achievement_manager.gd"
 
 [display]
 
-window/size/viewport_width=1080
-window/size/viewport_height=1920
-window/size/mode=2
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/mode=0
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
