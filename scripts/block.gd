@@ -194,8 +194,9 @@ func _handle_placement(overhang: float) -> void:
 		AudioManager.play_perfect()
 		block_placed.emit(0.0)
 	else:
-		# Calculate new width after slicing
-		var new_width = block_width - abs_overhang
+		# Calculate new width after slicing (apply shrink penalty multiplier for more forgiving gameplay)
+		var shrink_amount = abs_overhang * GameConfig.SHRINK_PENALTY_MULTIPLIER
+		var new_width = block_width - shrink_amount
 		
 		if new_width <= 0:
 			# Complete miss - emit game over signal

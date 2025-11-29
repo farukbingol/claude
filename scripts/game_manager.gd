@@ -134,8 +134,8 @@ func on_block_placed(overlap_amount: float) -> void:
 		var points = int(GameConfig.NORMAL_SCORE * speed_multiplier)
 		ScoreManager.add_score(points, false)
 		
-		# Reduce block width based on overhang
-		current_block_width -= abs(overlap_amount)
+		# Reduce block width based on overhang (apply shrink penalty multiplier for more forgiving gameplay)
+		current_block_width -= abs(overlap_amount) * GameConfig.SHRINK_PENALTY_MULTIPLIER
 	
 	# Check if block is too small
 	if current_block_width < min_block_width:
